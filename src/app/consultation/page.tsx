@@ -40,6 +40,28 @@ export default function StudentApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>("");
 
+  // 필수 필드 검증 함수
+  const isFormValid = () => {
+    const requiredFields = [
+      "student_name",
+      "gender",
+      "phone",
+      "birth_date",
+      "address",
+      "preferred_practice_date",
+      "preferred_semester",
+      "practice_type",
+      "preferred_day",
+      "advisor_name",
+      "car_available",
+    ];
+
+    return requiredFields.every((field) => {
+      const value = formData[field as keyof StudentApplicationForm];
+      return value && value.trim() !== "";
+    });
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -365,10 +387,19 @@ export default function StudentApplicationForm() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">선택하세요</option>
-                <option value="현장실습">사회복지사</option>
-                <option value="인턴십">보육교사</option>
-                <option value="취업연계실습">한국어교원</option>
-                <option value="기타">평생교육사</option>
+                <option value="사회복지사 실습 160시간">
+                  사회복지사 실습 160시간
+                </option>
+                <option value="사회복지사 실습 120시간">
+                  사회복지사 실습 120시간
+                </option>
+                <option value="보육교사 실습 240시간">
+                  보육교사 실습 240시간
+                </option>
+                <option value="평생교육사 실습 160시간">
+                  평생교육사 실습 160시간
+                </option>
+                <option value="한국어교원 실습">한국어교원 실습</option>
               </select>
             </div>
           </div>
@@ -438,10 +469,63 @@ export default function StudentApplicationForm() {
             </div>
           </div>
 
+          {/* 필수 필드 안내 메시지 */}
+          {!isFormValid() && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-yellow-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    모든 필수 항목을 입력해주세요
+                  </h3>
+                  <div className="mt-2 text-sm text-yellow-700">
+                    <p>
+                      아래 항목들을 모두 입력하셔야 신청서 제출이 가능합니다.
+                      <br />
+                      혹시 입력 중 모르는 부분이 있으시면 에듀바이저 담당자에게
+                      문의해 주시기 바랍니다.
+                    </p>
+                    <ul className="mt-1 list-disc list-inside">
+                      {!formData.student_name && <li>학생이름</li>}
+                      {!formData.gender && <li>성별</li>}
+                      {!formData.phone && <li>연락처</li>}
+                      {!formData.birth_date && <li>생년월일</li>}
+                      {!formData.address && <li>거주지 주소</li>}
+                      {!formData.preferred_practice_date && (
+                        <li>현장실습 희망날짜</li>
+                      )}
+                      {!formData.preferred_semester && <li>희망학기</li>}
+                      {!formData.practice_type && <li>실습종류</li>}
+                      {!formData.preferred_day && <li>희망요일</li>}
+                      {!formData.advisor_name && <li>에듀바이저스 이름</li>}
+                      {!formData.car_available && <li>자차여부</li>}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting || !isFormValid()}
+            className={`w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              isFormValid() && !isSubmitting
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+            }`}
           >
             {isSubmitting ? "제출 중..." : "실습신청 제출"}
           </button>

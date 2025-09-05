@@ -52,8 +52,8 @@ export default function AdminLoginPage() {
           return;
         }
 
-        // 로그인 성공 시 학생관리 페이지로 이동
-        router.push("/admin/students");
+        // 로그인 성공 시 학생관리 페이지로 이동 (강제 새로고침)
+        window.location.href = "/admin/students";
       }
     } catch (err) {
       console.error("Login catch error:", err);
