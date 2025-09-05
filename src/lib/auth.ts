@@ -16,11 +16,16 @@ const supabase = createClient();
 
 // 인증 관련 함수들
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  return { data, error };
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { data, error };
+  } catch (error) {
+    console.error("signIn error:", error);
+    return { data: null, error };
+  }
 };
 
 export const signOut = async () => {

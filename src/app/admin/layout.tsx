@@ -35,40 +35,58 @@ export default function AdminLayout({
         !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
       ) {
         console.error("Supabase environment variables not set");
+        setLoading(false);
         router.push("/admin/login");
         return;
       }
 
-      // 먼저 세션을 확인
-      const { session, error: sessionError } = await getSession();
+      // 타임아웃 설정 (5초)
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Auth timeout")), 5000)
+      );
 
-      if (sessionError) {
-        console.log("Session error:", sessionError);
+      const authPromise = async () => {
+        // 먼저 세션을 확인
+        const { session, error: sessionError } = await getSession();
+
+        if (sessionError) {
+          console.log("Session error:", sessionError);
+          return { success: false, error: sessionError };
+        }
+
+        if (!session) {
+          console.log("No session found");
+          return { success: false, error: "No session" };
+        }
+
+        // 세션이 있으면 사용자 정보 가져오기
+        const { user, error: userError } = await getCurrentUser();
+
+        if (userError || !user) {
+          console.log("User error:", userError);
+          return { success: false, error: userError };
+        }
+
+        console.log("User authenticated:", user.email);
+        return { success: true, user };
+      };
+
+      const result = (await Promise.race([
+        authPromise(),
+        timeoutPromise,
+      ])) as any;
+
+      if (result.success) {
+        setUser(result.user);
+        setLoading(false);
+      } else {
+        console.log("Auth failed:", result.error);
+        setLoading(false);
         router.push("/admin/login");
-        return;
       }
-
-      if (!session) {
-        console.log("No session found");
-        router.push("/admin/login");
-        return;
-      }
-
-      // 세션이 있으면 사용자 정보 가져오기
-      const { user, error: userError } = await getCurrentUser();
-
-      if (userError || !user) {
-        console.log("User error:", userError);
-        router.push("/admin/login");
-        return;
-      }
-
-      console.log("User authenticated:", user.email);
-      setUser(user);
-      setLoading(false);
     } catch (error) {
       console.error("Auth check error:", error);
-      // 타임아웃이나 오류 시 로그인 페이지로 리다이렉트
+      setLoading(false);
       router.push("/admin/login");
     }
   };
@@ -85,6 +103,9 @@ export default function AdminLayout({
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <div className="text-xl text-gray-600">로딩 중...</div>
           <div className="text-sm text-gray-500 mt-2">인증 확인 중입니다</div>
+          <div className="text-xs text-gray-400 mt-4">
+            로딩이 오래 걸리면 페이지를 새로고침해주세요
+          </div>
         </div>
       </div>
     );
