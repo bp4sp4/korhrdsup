@@ -54,6 +54,7 @@ export default function StudentApplicationForm() {
       "preferred_day",
       "advisor_name",
       "car_available",
+      "cash_receipt_number",
     ];
 
     return requiredFields.every((field) => {
@@ -457,13 +458,14 @@ export default function StudentApplicationForm() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                현금영수증 번호
+                현금영수증 번호 *
               </label>
               <input
                 type="text"
                 name="cash_receipt_number"
                 value={formData.cash_receipt_number}
                 onChange={handleInputChange}
+                required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -511,6 +513,9 @@ export default function StudentApplicationForm() {
                       {!formData.preferred_day && <li>희망요일</li>}
                       {!formData.advisor_name && <li>에듀바이저스 이름</li>}
                       {!formData.car_available && <li>자차여부</li>}
+                      {!formData.cash_receipt_number && (
+                        <li>현금영수증 번호</li>
+                      )}
                     </ul>
                   </div>
                 </div>
