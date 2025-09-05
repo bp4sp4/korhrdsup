@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -6,19 +7,19 @@ export default function Home() {
       {/* 헤더 */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-center items-center h-16">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">실습</span>
+              <div className="w-5 h-5  flex items-center justify-center">
+                <img
+                  src="/logo.png"
+                  alt="한평생실습지원센터 로고"
+                  className="rounded-lg"
+                />
               </div>
-              <h1 className="ml-3 text-xl font-bold text-gray-900">실습신청</h1>
+              <h1 className="ml-3 text-xl font-bold text-gray-900">
+                한평생실습지원센터
+              </h1>
             </div>
-            <Link
-              href="/admin/login"
-              className="text-gray-600 hover:text-gray-900 text-sm font-medium"
-            >
-              관리자 로그인
-            </Link>
           </div>
         </div>
       </header>
@@ -256,16 +257,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center mb-4">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">실습</span>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="한평생실습지원센터 로고"
+                  width={32}
+                  height={32}
+                  className="rounded-lg"
+                />
               </div>
-              <h3 className="ml-3 text-xl font-bold">실습신청</h3>
+              <h3 className="ml-3 text-xl font-bold">한평생실습지원센터</h3>
             </div>
-            <p className="text-gray-400 mb-4">
-              간편하고 안전한 실습신청 관리 시스템
-            </p>
+
             <p className="text-gray-500 text-sm">
-              &copy; 2024 실습신청 관리 시스템. All rights reserved.
+              &copy; 2024 한평생실습지원센터. All rights reserved.
             </p>
           </div>
         </div>
