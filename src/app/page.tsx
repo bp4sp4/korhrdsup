@@ -16,7 +16,7 @@ export default function Home() {
                   className="rounded-lg"
                 />
               </div>
-              <h1 className="ml-3 text-xl font-bold text-gray-900">
+              <h1 className="ml-2 text-xl font-bold text-gray-900">
                 한평생실습지원센터
               </h1>
             </div>

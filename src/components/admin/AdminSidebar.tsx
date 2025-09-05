@@ -42,16 +42,17 @@ export default function AdminSidebar() {
         {/* 로고 */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-              <Image
+            <div
+              className="w-5 h-5
+             rounded-lg flex items-center justify-center"
+            >
+              <img
                 src="/logo.png"
                 alt="한평생실습지원센터 로고"
-                width={32}
-                height={32}
                 className="rounded-lg"
               />
             </div>
-            <span className="ml-2 text-lg font-semibold text-gray-900">
+            <span className="ml-2 text-xl font-semibold text-gray-900">
               한평생실습지원센터
             </span>
           </div>
