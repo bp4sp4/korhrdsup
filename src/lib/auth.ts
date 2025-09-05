@@ -1,10 +1,15 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Supabase environment variables are not set");
+    throw new Error("Supabase configuration is missing");
+  }
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
 }
 
 const supabase = createClient();
@@ -24,17 +29,27 @@ export const signOut = async () => {
 };
 
 export const getCurrentUser = async () => {
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  return { user, error };
+  try {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+    return { user, error };
+  } catch (error) {
+    console.error("getCurrentUser error:", error);
+    return { user: null, error };
+  }
 };
 
 export const getSession = async () => {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-  return { session, error };
+  try {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+    return { session, error };
+  } catch (error) {
+    console.error("getSession error:", error);
+    return { session: null, error };
+  }
 };

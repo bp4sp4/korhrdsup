@@ -28,19 +28,30 @@ export default function AdminLoginPage() {
       if (data.user) {
         console.log("Login successful, user:", data.user.email);
 
-        // 세션이 설정될 때까지 잠시 대기
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // 세션이 설정될 때까지 대기 (최대 3초)
+        let sessionConfirmed = false;
+        for (let i = 0; i < 6; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // 세션 확인
-        const { session, error: sessionError } = await getSession();
+          const { session, error: sessionError } = await getSession();
 
-        if (sessionError || !session) {
-          console.error("Session error:", sessionError);
-          setError("세션 설정에 실패했습니다. 다시 시도해주세요.");
+          if (session && !sessionError) {
+            console.log("Session confirmed, redirecting...");
+            sessionConfirmed = true;
+            break;
+          }
+
+          console.log(`Session check attempt ${i + 1}/6`);
+        }
+
+        if (!sessionConfirmed) {
+          console.error("Session setup timeout");
+          setError(
+            "세션 설정에 시간이 오래 걸립니다. 페이지를 새로고침해주세요."
+          );
           return;
         }
 
-        console.log("Session confirmed, redirecting...");
         // 로그인 성공 시 학생관리 페이지로 이동
         router.push("/admin/students");
       }
