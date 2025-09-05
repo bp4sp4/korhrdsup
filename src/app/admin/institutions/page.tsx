@@ -191,10 +191,27 @@ export default function InstitutionsPage() {
   };
 
   const handleEducationSelectAll = () => {
-    if (selectedEducation.length === educationCenters.length) {
-      setSelectedEducation([]);
+    const currentPageIds = paginatedEducationCenters.map((c) => c.id);
+    const allCurrentPageSelected = currentPageIds.every((id) =>
+      selectedEducation.includes(id)
+    );
+
+    if (allCurrentPageSelected) {
+      // 현재 페이지의 모든 항목이 선택되어 있으면 해제
+      setSelectedEducation((prev) =>
+        prev.filter((id) => !currentPageIds.includes(id))
+      );
     } else {
-      setSelectedEducation(educationCenters.map((c) => c.id));
+      // 현재 페이지의 모든 항목을 선택
+      setSelectedEducation((prev) => {
+        const newSelection = [...prev];
+        currentPageIds.forEach((id) => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
     }
   };
 
@@ -257,10 +274,27 @@ export default function InstitutionsPage() {
   };
 
   const handleInstitutionSelectAll = () => {
-    if (selectedInstitutions.length === practiceInstitutions.length) {
-      setSelectedInstitutions([]);
+    const currentPageIds = paginatedPracticeInstitutions.map((i) => i.id);
+    const allCurrentPageSelected = currentPageIds.every((id) =>
+      selectedInstitutions.includes(id)
+    );
+
+    if (allCurrentPageSelected) {
+      // 현재 페이지의 모든 항목이 선택되어 있으면 해제
+      setSelectedInstitutions((prev) =>
+        prev.filter((id) => !currentPageIds.includes(id))
+      );
     } else {
-      setSelectedInstitutions(practiceInstitutions.map((i) => i.id));
+      // 현재 페이지의 모든 항목을 선택
+      setSelectedInstitutions((prev) => {
+        const newSelection = [...prev];
+        currentPageIds.forEach((id) => {
+          if (!newSelection.includes(id)) {
+            newSelection.push(id);
+          }
+        });
+        return newSelection;
+      });
     }
   };
 
@@ -706,9 +740,10 @@ export default function InstitutionsPage() {
                           <input
                             type="checkbox"
                             checked={
-                              selectedEducation.length ===
-                                paginatedEducationCenters.length &&
-                              paginatedEducationCenters.length > 0
+                              paginatedEducationCenters.length > 0 &&
+                              paginatedEducationCenters.every((center) =>
+                                selectedEducation.includes(center.id)
+                              )
                             }
                             onChange={handleEducationSelectAll}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -1051,9 +1086,11 @@ export default function InstitutionsPage() {
                           <input
                             type="checkbox"
                             checked={
-                              selectedInstitutions.length ===
-                                paginatedPracticeInstitutions.length &&
-                              paginatedPracticeInstitutions.length > 0
+                              paginatedPracticeInstitutions.length > 0 &&
+                              paginatedPracticeInstitutions.every(
+                                (institution) =>
+                                  selectedInstitutions.includes(institution.id)
+                              )
                             }
                             onChange={handleInstitutionSelectAll}
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
