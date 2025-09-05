@@ -30,22 +30,6 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
         {/* 오른쪽: 사용자 메뉴 */}
         <div className="flex items-center space-x-4">
           {/* 알림 */}
-          <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 17h5l-5 5v-5zM4 19h6v-6H4v6z"
-              />
-            </svg>
-            <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-          </button>
 
           {/* 사용자 프로필 */}
           <div className="relative">

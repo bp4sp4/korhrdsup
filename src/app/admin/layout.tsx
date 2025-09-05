@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getSession } from "@/lib/auth";
 import { useRouter, usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -28,13 +28,32 @@ export default function AdminLayout({
   }, [pathname, router]);
 
   const checkAuth = async () => {
-    const { user, error } = await getCurrentUser();
-    if (error || !user) {
+    try {
+      // 먼저 세션을 확인
+      const { session, error: sessionError } = await getSession();
+
+      if (sessionError || !session) {
+        console.log("No session found, redirecting to login");
+        router.push("/admin/login");
+        return;
+      }
+
+      // 세션이 있으면 사용자 정보 가져오기
+      const { user, error: userError } = await getCurrentUser();
+
+      if (userError || !user) {
+        console.log("User error:", userError);
+        router.push("/admin/login");
+        return;
+      }
+
+      console.log("User authenticated:", user.email);
+      setUser(user);
+      setLoading(false);
+    } catch (error) {
+      console.error("Auth check error:", error);
       router.push("/admin/login");
-      return;
     }
-    setUser(user);
-    setLoading(false);
   };
 
   // 로그인 페이지는 레이아웃에서 제외
