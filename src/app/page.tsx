@@ -14,7 +14,10 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               실습신청을
-              <span className="text-blue-600">&nbsp;간편하게</span>
+              <span className="text-blue-600">
+                <br className="md:hidden block" />
+                &nbsp;간편하게
+              </span>
             </h1>
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
               실습신청서를 작성해 주시면 담당자가
@@ -71,7 +74,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              왜 한평생에서 실습을 진행해야 할까요?
+              왜 한평생에서
+              <br className="md:hidden block" /> 실습을 진행해야 할까요?
             </h2>
             <p className="text-lg text-gray-600">
               간편하고 안전한 실습신청 경험을 제공합니다

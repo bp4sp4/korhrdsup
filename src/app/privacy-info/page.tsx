@@ -27,6 +27,7 @@ export default function PrivacyInfoPage() {
                       alt={`실습 신청 안내 ${index + 1}`}
                       width={800}
                       height={600}
+                      className="rounded-lg shadow-lg"
                       priority={index === 0}
                     />
                   </div>

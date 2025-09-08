@@ -45,6 +45,7 @@ export default function StudentApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>("");
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // 필수 필드 검증 함수
   const isFormValid = () => {
@@ -210,7 +211,7 @@ export default function StudentApplicationForm() {
         throw error;
       }
 
-      setSubmitStatus("✅ 실습신청이 성공적으로 제출되었습니다!");
+      setShowSuccessModal(true);
       setFormData({
         student_name: "",
         gender: "",
@@ -239,28 +240,70 @@ export default function StudentApplicationForm() {
     <div className="min-h-screen bg-white">
       <Header />
 
+      {/* 모바일 달력 위치 조정을 위한 CSS */}
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          /* 모바일에서 달력이 상단에 고정되도록 조정 */
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            position: relative;
+            z-index: 1;
+          }
+
+          /* 달력 팝업이 화면 상단에 나타나도록 조정 */
+          input[type="date"]:focus {
+            position: relative;
+            z-index: 10;
+          }
+
+          /* 모바일에서 입력 필드들의 최소 너비 설정 */
+          .mobile-input {
+            min-width: 100%;
+            max-width: 100%;
+          }
+
+          /* 모바일에서 그리드 간격 조정 */
+          .mobile-grid {
+            gap: 1rem;
+          }
+
+          /* 모바일에서 달력이 화면 상단에 나타나도록 조정 */
+          input[type="date"] {
+            position: relative;
+          }
+
+          /* 모바일에서 달력 팝업 위치 조정 */
+          input[type="date"]::-webkit-datetime-edit {
+            position: relative;
+            z-index: 1;
+          }
+
+          /* 모바일에서 달력 버튼 위치 조정 */
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+          }
+        }
+      `}</style>
+
       {/* 메인 컨텐츠 */}
       <div className="bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8">
           <h1 className="text-3xl font-bold text-center mb-8">실습신청서</h1>
 
-          {submitStatus && (
-            <div
-              className={`mb-6 p-4 rounded-md ${
-                submitStatus.includes("✅")
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
+          {submitStatus && !submitStatus.includes("✅") && (
+            <div className="mb-6 p-4 rounded-md bg-red-100 text-red-800">
               {submitStatus}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* 기본 정보 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   학생이름 *
                 </label>
                 <input
@@ -269,12 +312,12 @@ export default function StudentApplicationForm() {
                   value={formData.student_name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   성별 *
                 </label>
                 <select
@@ -282,7 +325,7 @@ export default function StudentApplicationForm() {
                   value={formData.gender}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 >
                   <option value="">선택하세요</option>
                   <option value="남성">남성</option>
@@ -291,9 +334,9 @@ export default function StudentApplicationForm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   연락처 * (010-0000-0000)
                 </label>
                 <input
@@ -303,12 +346,12 @@ export default function StudentApplicationForm() {
                   onChange={handlePhoneChange}
                   required
                   placeholder="010-0000-0000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   생년월일 *
                 </label>
                 <input
@@ -319,13 +362,13 @@ export default function StudentApplicationForm() {
                   min="1960-01-01"
                   max="2010-12-31"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-base font-medium text-gray-700 mb-2">
                 거주지 주소 * (전북 00시 00동 00아파트)
               </label>
               <input
@@ -335,13 +378,13 @@ export default function StudentApplicationForm() {
                 onChange={handleInputChange}
                 required
                 placeholder="전북 00시 00동 00아파트"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   현장실습 희망날짜 *
                 </label>
                 <input
@@ -352,12 +395,12 @@ export default function StudentApplicationForm() {
                   min={new Date().toISOString().split("T")[0]}
                   max="2030-12-31"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   성적보고일
                 </label>
                 <input
@@ -365,14 +408,14 @@ export default function StudentApplicationForm() {
                   name="grade_report_date"
                   value={formData.grade_report_date}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   희망학기 *
                 </label>
                 <select
@@ -380,7 +423,7 @@ export default function StudentApplicationForm() {
                   value={formData.preferred_semester}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 >
                   <option value="">선택하세요</option>
                   <option value="26년도 1학기">26년도 1학기</option>
@@ -393,7 +436,7 @@ export default function StudentApplicationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   실습종류 *
                 </label>
                 <select
@@ -401,7 +444,7 @@ export default function StudentApplicationForm() {
                   value={formData.practice_type}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 >
                   <option value="">선택하세요</option>
                   <option value="사회복지사 실습 160시간">
@@ -421,9 +464,9 @@ export default function StudentApplicationForm() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   희망요일 (8시간고정) *
                 </label>
                 <select
@@ -431,7 +474,7 @@ export default function StudentApplicationForm() {
                   value={formData.preferred_day}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 >
                   <option value="">선택하세요</option>
                   <option value="평일">평일</option>
@@ -440,7 +483,7 @@ export default function StudentApplicationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   에듀바이저스 이름 *
                 </label>
                 <input
@@ -449,14 +492,14 @@ export default function StudentApplicationForm() {
                   value={formData.advisor_name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-grid">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   자차여부 *
                 </label>
                 <select
@@ -464,7 +507,7 @@ export default function StudentApplicationForm() {
                   value={formData.car_available}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 >
                   <option value="">선택하세요</option>
                   <option value="O">O</option>
@@ -473,7 +516,7 @@ export default function StudentApplicationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-medium text-gray-700 mb-2">
                   현금영수증 번호 *
                 </label>
                 <input
@@ -482,7 +525,7 @@ export default function StudentApplicationForm() {
                   value={formData.cash_receipt_number}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                 />
               </div>
             </div>
@@ -582,6 +625,56 @@ export default function StudentApplicationForm() {
           </form>
         </div>
       </div>
+
+      {/* 성공 모달 */}
+      {showSuccessModal && (
+        <div className="fixed bg-[#00000080] inset-0 border flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="mb-4">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              신청 완료!
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              실습신청이 성공적으로 제출되었습니다.
+              <br />
+              담당자가 확인 후 연락드리겠습니다.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                확인
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  router.push("/");
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                홈으로
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
