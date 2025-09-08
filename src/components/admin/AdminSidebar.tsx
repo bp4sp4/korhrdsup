@@ -56,7 +56,7 @@ export default function AdminSidebar() {
               />
             </div>
             <span className="ml-2 text-xl font-semibold text-gray-900">
-              한평생실습지원센터
+              한평생실습지원
             </span>
           </div>
           <button

@@ -17,7 +17,7 @@ export default function Home() {
                 />
               </div>
               <h1 className="ml-2 text-xl font-bold text-gray-900">
-                한평생실습지원센터
+                한평생실습지원
               </h1>
             </div>
           </div>
@@ -30,12 +30,12 @@ export default function Home() {
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
               실습신청을
-              <br />
-              <span className="text-blue-600">간편하게</span>
+              <span className="text-blue-600">&nbsp;간편하게</span>
             </h1>
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-              복잡한 절차 없이 몇 분만에 실습신청을 완료하고, 전문 담당자가
-              체계적으로 관리해드립니다.
+              실습신청서를 작성해 주시면 담당자가
+              <br />
+              확인 후 순차적으로 섭외해 드립니다.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -84,7 +84,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              왜 실습신청을 선택해야 할까요?
+              왜 한평생에서 실습을 진행해야 할까요?
             </h2>
             <p className="text-lg text-gray-600">
               간편하고 안전한 실습신청 경험을 제공합니다
@@ -112,8 +112,8 @@ export default function Home() {
                 빠른 신청
               </h3>
               <p className="text-gray-600">
-                5분이면 끝! 복잡한 절차 없이 간편하게 실습신청을 완료할 수
-                있습니다.
+                5분이면 끝! 복잡한 절차 없이 간편하게
+                <br /> 실습신청을 완료할 수 있습니다.
               </p>
             </div>
 
@@ -137,8 +137,8 @@ export default function Home() {
                 안전한 관리
               </h3>
               <p className="text-gray-600">
-                전문 담당자가 체계적으로 관리하여 안전하고 신뢰할 수 있는 실습
-                환경을 제공합니다.
+                전문 담당자가 체계적으로 관리하여 안전하고
+                <br /> 신뢰할 수 있는 실습 환경을 제공합니다.
               </p>
             </div>
 
@@ -159,10 +159,12 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
-                실시간 확인
+                1:1 맞춤 섬외
               </h3>
               <p className="text-gray-600">
-                신청 현황을 실시간으로 확인하고, 담당자와 소통할 수 있습니다.
+                상황에 맞춰 가장 적합하고 가까운 곳으로
+                <br /> 연결해 드리며, 개인 사유로 인한
+                <br /> 재연계 요청 시 비용이 발생합니다.
               </p>
             </div>
           </div>
