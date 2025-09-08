@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getCurrentUser, getSession } from "@/lib/auth";
 import { supabase } from "@/lib/supabase-client";
 import { useRouter, usePathname } from "next/navigation";
@@ -18,42 +18,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    setMounted(true);
-    checkAuth();
-  }, []);
-
-  // 세션 변경 감지
-  useEffect(() => {
-    if (!mounted) return;
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.email);
-
-      if (event === "SIGNED_IN" && session?.user) {
-        console.log("User signed in:", session.user.email);
-        setUser(session.user);
-        setLoading(false);
-      } else if (event === "SIGNED_OUT") {
-        console.log("User signed out");
-        setUser(null);
-        setLoading(false);
-        router.push("/admin/login");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [mounted, router]);
-
-  useEffect(() => {
-    if (pathname === "/admin") {
-      router.push("/admin/students");
-    }
-  }, [pathname, router]);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       if (
         !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -111,7 +76,50 @@ export default function AdminLayout({
       setLoading(false);
       router.push("/admin/login");
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    setMounted(true);
+    checkAuth();
+  }, [checkAuth]);
+
+  // 세션 변경 감지
+  useEffect(() => {
+    if (!mounted) return;
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.email);
+
+      if (event === "SIGNED_IN" && session?.user) {
+        console.log("User signed in:", session.user.email);
+        setUser(session.user);
+        setLoading(false);
+      } else if (event === "SIGNED_OUT") {
+        console.log("User signed out");
+        setUser(null);
+        setLoading(false);
+        router.push("/admin/login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [mounted, router]);
+
+  useEffect(() => {
+    if (pathname === "/admin") {
+      router.push("/admin/students");
+    }
+  }, [pathname, router]);
+
+  // 사용자가 없을 때 리다이렉트 처리
+  useEffect(() => {
+    if (!user && mounted && !loading) {
+      console.log("No user found, redirecting to login");
+      router.push("/admin/login");
+    }
+  }, [user, mounted, loading, router]);
 
   // 로그인 페이지는 레이아웃에서 제외
   if (pathname === "/admin/login") {
@@ -135,14 +143,6 @@ export default function AdminLayout({
       </div>
     );
   }
-
-  // 사용자가 없을 때 리다이렉트 처리
-  useEffect(() => {
-    if (!user && mounted && !loading) {
-      console.log("No user found, redirecting to login");
-      router.push("/admin/login");
-    }
-  }, [user, mounted, loading, router]);
 
   if (!user) {
     return (

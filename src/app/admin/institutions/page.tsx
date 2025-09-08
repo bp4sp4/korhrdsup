@@ -141,17 +141,63 @@ export default function InstitutionsPage() {
 
   const handleEducationSave = async () => {
     try {
+      // 필수 필드 검증
+      const requiredFields = [
+        "center_name",
+        "practice_type",
+        "semester",
+        "law_type",
+        "practice_available_area",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !educationForm[field as keyof typeof educationForm]
+      );
+
+      if (missingFields.length > 0) {
+        setError(`다음 필수 필드를 입력해주세요: ${missingFields.join(", ")}`);
+        return;
+      }
+
+      // 빈 값 제거 및 유효한 필드만 포함
+      const validFields = [
+        "center_name",
+        "practice_type",
+        "location",
+        "practice_available_area",
+        "semester",
+        "law_type",
+        "seminar_day",
+        "seminar_count",
+        "website_url",
+      ];
+
+      const cleanFormData = Object.fromEntries(
+        Object.entries(educationForm).filter(
+          ([key, value]) =>
+            validFields.includes(key) &&
+            value !== "" &&
+            value !== null &&
+            value !== undefined
+        )
+      );
+
       if (editingEducation) {
-        const { error } = await (supabase as any)
+        const { data, error } = await (supabase as any)
           .from("education_centers")
-          .update(educationForm)
+          .update(cleanFormData)
           .eq("id", editingEducation.id);
-        if (error) throw error;
+        if (error) {
+          console.error("Update error:", error);
+          throw error;
+        }
       } else {
-        const { error } = await (supabase as any)
+        const { data, error } = await (supabase as any)
           .from("education_centers")
-          .insert([educationForm]);
-        if (error) throw error;
+          .insert([cleanFormData]);
+        if (error) {
+          console.error("Insert error:", error);
+          throw error;
+        }
       }
 
       await fetchEducationCenters();
@@ -240,16 +286,51 @@ export default function InstitutionsPage() {
 
   const handleInstitutionSave = async () => {
     try {
+      // 필수 필드 검증
+      const requiredFields = [
+        "institution_name",
+        "location",
+        "practice_area",
+        "schedule_type",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !institutionForm[field as keyof typeof institutionForm]
+      );
+
+      if (missingFields.length > 0) {
+        setError(`다음 필수 필드를 입력해주세요: ${missingFields.join(", ")}`);
+        return;
+      }
+
+      // 빈 값 제거 및 유효한 필드만 포함
+      const validFields = [
+        "institution_name",
+        "location",
+        "practice_area",
+        "schedule_type",
+        "cost",
+      ];
+
+      const cleanFormData = Object.fromEntries(
+        Object.entries(institutionForm).filter(
+          ([key, value]) =>
+            validFields.includes(key) &&
+            value !== "" &&
+            value !== null &&
+            value !== undefined
+        )
+      );
+
       if (editingInstitution) {
         const { error } = await (supabase as any)
           .from("practice_institutions")
-          .update(institutionForm)
+          .update(cleanFormData)
           .eq("id", editingInstitution.id);
         if (error) throw error;
       } else {
         const { error } = await (supabase as any)
           .from("practice_institutions")
-          .insert([institutionForm]);
+          .insert([cleanFormData]);
         if (error) throw error;
       }
 
@@ -1280,7 +1361,7 @@ export default function InstitutionsPage() {
 
           {/* 실습교육원 편집 모달 */}
           {showEducationModal && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="fixed inset-0 bg-[#00000080] overflow-y-auto h-full w-full z-50">
               <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
                 <div className="mt-3">
                   <div className="flex justify-between items-center mb-4">
@@ -1307,7 +1388,7 @@ export default function InstitutionsPage() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-140 overflow-y-auto">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         실습교육원명
@@ -1456,7 +1537,7 @@ export default function InstitutionsPage() {
 
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        실습가능 지역
+                        실습가능 지역 <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"

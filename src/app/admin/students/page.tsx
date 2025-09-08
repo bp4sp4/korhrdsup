@@ -414,7 +414,17 @@ export default function StudentsPage() {
   const handleDeleteSelected = async () => {
     if (selectedStudents.length === 0) return;
 
+    if (
+      !confirm(
+        `선택한 ${selectedStudents.length}개의 학생 신청서를 삭제하시겠습니까?`
+      )
+    ) {
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const { error } = await supabase
         .from("student_applications")
         .delete()
@@ -422,11 +432,19 @@ export default function StudentsPage() {
 
       if (error) throw error;
 
-      await fetchStudents();
+      // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
+      setStudents((prev) =>
+        prev.filter((student) => !selectedStudents.includes(student.id))
+      );
       setSelectedStudents([]);
       setShowDeleteModal(false);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+      // 실패 시 데이터 다시 로드
+      await fetchStudents();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -926,17 +944,12 @@ export default function StudentsPage() {
                   </button>
                 </>
               )}
-              {activeTab === "refunded" && (
+              {selectedStudents.length > 0 && (
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
-                    selectedStudents.length > 0
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                  disabled={selectedStudents.length === 0}
+                  className="px-4 py-2 rounded-lg transition-colors text-sm bg-red-600 text-white hover:bg-red-700"
                 >
-                  선택 삭제 ({selectedStudents.length})
+                  선택 삭제
                 </button>
               )}
             </div>
@@ -1309,7 +1322,7 @@ export default function StudentsPage() {
 
       {/* 편집 모달 */}
       {showEditModal && editingStudent && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-[#00000080] overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
             <div className="mt-3">
               <div className="flex justify-between items-center mb-4">
@@ -1709,8 +1722,8 @@ export default function StudentsPage() {
 
       {/* 삭제 확인 모달 */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-[#00000080] overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-100 flex justify-center items-center shadow-lg rounded-md bg-white">
             <div className="mt-3 text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <svg

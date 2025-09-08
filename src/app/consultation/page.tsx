@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase-client";
 
 interface StudentApplicationForm {
@@ -25,7 +25,7 @@ export default function StudentApplicationForm() {
     student_name: "",
     gender: "",
     phone: "",
-    birth_date: "",
+    birth_date: "1960-01-01", // 기본값을 1970년 1월 1일로 설정
     address: "",
     preferred_practice_date: "",
     grade_report_date: "",
@@ -308,6 +308,8 @@ export default function StudentApplicationForm() {
                 name="birth_date"
                 value={formData.birth_date}
                 onChange={handleInputChange}
+                min="1960-01-01"
+                max="2010-12-31"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -339,6 +341,8 @@ export default function StudentApplicationForm() {
                 name="preferred_practice_date"
                 value={formData.preferred_practice_date}
                 onChange={handleInputChange}
+                min={new Date().toISOString().split("T")[0]}
+                max="2030-12-31"
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
