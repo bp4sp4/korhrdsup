@@ -414,23 +414,24 @@ export default function StudentsPage() {
   const handleDeleteSelected = async () => {
     if (selectedStudents.length === 0) return;
 
-    if (
-      !confirm(
-        `선택한 ${selectedStudents.length}개의 학생 신청서를 삭제하시겠습니까?`
-      )
-    ) {
-      return;
-    }
+    const deleteCount = selectedStudents.length; // 삭제 전에 개수 저장
 
     try {
       setLoading(true);
+      console.log("삭제할 학생 ID들:", selectedStudents);
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("student_applications")
         .delete()
-        .in("id", selectedStudents);
+        .in("id", selectedStudents)
+        .select(); // 삭제된 데이터를 반환받기 위해 select 추가
 
-      if (error) throw error;
+      console.log("삭제 결과:", { data, error });
+
+      if (error) {
+        console.error("삭제 오류 상세:", error);
+        throw error;
+      }
 
       // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
       setStudents((prev) =>
@@ -439,7 +440,10 @@ export default function StudentsPage() {
       setSelectedStudents([]);
       setShowDeleteModal(false);
       setError(null);
+
+      alert(`${deleteCount}개의 학생 신청서가 삭제되었습니다.`);
     } catch (err) {
+      console.error("삭제 실패 상세 오류:", err);
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
       // 실패 시 데이터 다시 로드
       await fetchStudents();
