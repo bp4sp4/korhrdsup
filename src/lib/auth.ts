@@ -1,18 +1,4 @@
-import { createBrowserClient } from "@supabase/ssr";
-
-export function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Supabase environment variables are not set");
-    throw new Error("Supabase configuration is missing");
-  }
-
-  return createBrowserClient(supabaseUrl, supabaseAnonKey);
-}
-
-const supabase = createClient();
+import { supabase } from "./supabase-client";
 
 // 인증 관련 함수들
 export const signIn = async (email: string, password: string) => {

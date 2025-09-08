@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { usePathname } from "next/navigation";
 
 const navigation = [
   {
     name: "학생 관리",
     href: "/admin/students",
-    icon: "👥",
     description: "학생 정보 및 실습신청 관리",
   },
   {
     name: "실습기관 관리",
     href: "/admin/institutions",
-    icon: "🏢",
     description: "실습기관 및 교육원 관리",
+  },
+  {
+    name: "상담 관리",
+    href: "/admin/consultations",
+    description: "상담 기록 및 관리",
   },
 ];
 
@@ -90,7 +93,6 @@ export default function AdminSidebar() {
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <span className="text-lg mr-3">{item.icon}</span>
                 <div className="flex-1">
                   <div className="font-medium">{item.name}</div>
                   <div className="text-xs text-gray-500">

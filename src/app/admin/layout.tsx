@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCurrentUser, getSession } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-client";
 import { useRouter, usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -136,9 +136,15 @@ export default function AdminLayout({
     );
   }
 
+  // 사용자가 없을 때 리다이렉트 처리
+  useEffect(() => {
+    if (!user && mounted && !loading) {
+      console.log("No user found, redirecting to login");
+      router.push("/admin/login");
+    }
+  }, [user, mounted, loading, router]);
+
   if (!user) {
-    console.log("No user found, redirecting to login");
-    router.push("/admin/login");
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

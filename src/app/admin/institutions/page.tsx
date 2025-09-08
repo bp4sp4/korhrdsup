@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-client";
 
 // 실습교육원 인터페이스
 interface EducationCenter {
@@ -142,13 +142,13 @@ export default function InstitutionsPage() {
   const handleEducationSave = async () => {
     try {
       if (editingEducation) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("education_centers")
           .update(educationForm)
           .eq("id", editingEducation.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("education_centers")
           .insert([educationForm]);
         if (error) throw error;
@@ -156,6 +156,7 @@ export default function InstitutionsPage() {
 
       await fetchEducationCenters();
       handleEducationCancel();
+      setError(null); // 성공 시 에러 메시지 초기화
     } catch (err) {
       setError(err instanceof Error ? err.message : "저장에 실패했습니다.");
     }
@@ -168,17 +169,32 @@ export default function InstitutionsPage() {
   };
 
   const handleEducationDelete = async (ids: string[]) => {
+    if (!confirm(`선택한 ${ids.length}개의 실습교육원을 삭제하시겠습니까?`)) {
+      return;
+    }
+
     try {
+      setLoading(true); // 로딩 상태 시작
+
       const { error } = await supabase
         .from("education_centers")
         .delete()
         .in("id", ids);
 
       if (error) throw error;
-      await fetchEducationCenters();
+
+      // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
+      setEducationCenters((prev) =>
+        prev.filter((center) => !ids.includes(center.id))
+      );
       setSelectedEducation([]);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+      // 실패 시 데이터 다시 로드
+      await fetchEducationCenters();
+    } finally {
+      setLoading(false); // 로딩 상태 종료
     }
   };
 
@@ -225,13 +241,13 @@ export default function InstitutionsPage() {
   const handleInstitutionSave = async () => {
     try {
       if (editingInstitution) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("practice_institutions")
           .update(institutionForm)
           .eq("id", editingInstitution.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from("practice_institutions")
           .insert([institutionForm]);
         if (error) throw error;
@@ -239,6 +255,7 @@ export default function InstitutionsPage() {
 
       await fetchPracticeInstitutions();
       handleInstitutionCancel();
+      setError(null); // 성공 시 에러 메시지 초기화
     } catch (err) {
       setError(err instanceof Error ? err.message : "저장에 실패했습니다.");
     }
@@ -251,17 +268,32 @@ export default function InstitutionsPage() {
   };
 
   const handleInstitutionDelete = async (ids: string[]) => {
+    if (!confirm(`선택한 ${ids.length}개의 실습기관을 삭제하시겠습니까?`)) {
+      return;
+    }
+
     try {
+      setLoading(true); // 로딩 상태 시작
+
       const { error } = await supabase
         .from("practice_institutions")
         .delete()
         .in("id", ids);
 
       if (error) throw error;
-      await fetchPracticeInstitutions();
+
+      // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
+      setPracticeInstitutions((prev) =>
+        prev.filter((institution) => !ids.includes(institution.id))
+      );
       setSelectedInstitutions([]);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+      // 실패 시 데이터 다시 로드
+      await fetchPracticeInstitutions();
+    } finally {
+      setLoading(false); // 로딩 상태 종료
     }
   };
 
@@ -313,12 +345,14 @@ export default function InstitutionsPage() {
         center.website_url.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesFilters = Object.entries(educationFilters).every(
-      ([key, value]) =>
-        !value ||
-        center[key as keyof EducationCenter]
-          ?.toString()
-          .toLowerCase()
-          .includes(value.toLowerCase())
+      ([key, value]) => {
+        if (!value) return true;
+        const centerValue = center[key as keyof EducationCenter];
+        return (
+          centerValue?.toString().toLowerCase().includes(value.toLowerCase()) ??
+          false
+        );
+      }
     );
 
     return matchesSearch && matchesFilters;
@@ -340,12 +374,17 @@ export default function InstitutionsPage() {
           .includes(searchTerm.toLowerCase());
 
       const matchesFilters = Object.entries(institutionFilters).every(
-        ([key, value]) =>
-          !value ||
-          institution[key as keyof PracticeInstitution]
-            ?.toString()
-            .toLowerCase()
-            .includes(value.toLowerCase())
+        ([key, value]) => {
+          if (!value) return true;
+          const institutionValue =
+            institution[key as keyof PracticeInstitution];
+          return (
+            institutionValue
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase()) ?? false
+          );
+        }
       );
 
       return matchesSearch && matchesFilters;
@@ -434,20 +473,6 @@ export default function InstitutionsPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex">
-          <div className="flex-1 p-6">
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="text-red-800">{error}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="flex">
@@ -455,6 +480,31 @@ export default function InstitutionsPage() {
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">실습기관 관리</h1>
             <p className="text-gray-600">실습교육원과 실습기관을 관리합니다.</p>
+            {error && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-red-800">{error}</div>
+                  <button
+                    onClick={() => setError(null)}
+                    className="text-red-400 hover:text-red-600"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 탭 네비게이션 */}
@@ -720,9 +770,14 @@ export default function InstitutionsPage() {
                   {selectedEducation.length > 0 && (
                     <button
                       onClick={() => handleEducationDelete(selectedEducation)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm"
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-md text-sm transition-colors ${
+                        loading
+                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
                     >
-                      선택 삭제
+                      {loading ? "삭제 중..." : "선택 삭제"}
                     </button>
                   )}
                 </div>
@@ -1066,9 +1121,14 @@ export default function InstitutionsPage() {
                       onClick={() =>
                         handleInstitutionDelete(selectedInstitutions)
                       }
-                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm"
+                      disabled={loading}
+                      className={`px-4 py-2 rounded-md text-sm transition-colors ${
+                        loading
+                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
                     >
-                      선택 삭제
+                      {loading ? "삭제 중..." : "선택 삭제"}
                     </button>
                   )}
                 </div>

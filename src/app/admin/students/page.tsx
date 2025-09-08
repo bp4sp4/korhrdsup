@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-client";
 
 interface Student {
   id: string;
@@ -807,113 +807,137 @@ export default function StudentsPage() {
               )}
             </div>
             <div className="flex space-x-2">
-              {selectedStudents.length > 0 && (
+              {activeTab === "pending" && (
                 <>
-                  {activeTab === "pending" && (
-                    <>
-                      <button
-                        onClick={handleMarkAsPaid}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                      >
-                        입금완료 ({selectedStudents.length})
-                      </button>
-                      <button
-                        onClick={handleMarkAsUnpaid}
-                        className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
-                      >
-                        입금취소 ({selectedStudents.length})
-                      </button>
-                      <button
-                        onClick={handleMarkAsPracticeCompleted}
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-                      >
-                        실습완료 ({selectedStudents.length})
-                      </button>
-                    </>
-                  )}
-                  {activeTab === "completed" && (
-                    <>
-                      <button
-                        onClick={() => {
-                          // 실습완료에서 관리대기로 일괄 이동
-                          const updatePromises = selectedStudents.map(
-                            (studentId) =>
-                              supabase
-                                .from("student_applications")
-                                .update({
-                                  practice_completion_status: "not_started",
-                                })
-                                .eq("id", studentId)
-                          );
+                  <button
+                    onClick={handleMarkAsPaid}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    입금완료 ({selectedStudents.length})
+                  </button>
+                  <button
+                    onClick={handleMarkAsUnpaid}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-orange-600 text-white hover:bg-orange-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    입금취소 ({selectedStudents.length})
+                  </button>
+                  <button
+                    onClick={handleMarkAsPracticeCompleted}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    실습완료 ({selectedStudents.length})
+                  </button>
+                </>
+              )}
+              {activeTab === "completed" && (
+                <>
+                  <button
+                    onClick={() => {
+                      // 실습완료에서 관리대기로 일괄 이동
+                      const updatePromises = selectedStudents.map((studentId) =>
+                        supabase
+                          .from("student_applications")
+                          .update({
+                            practice_completion_status: "not_started",
+                          })
+                          .eq("id", studentId)
+                      );
 
-                          Promise.all(updatePromises).then(() => {
-                            setStudents((prev) =>
-                              prev.map((student) =>
-                                selectedStudents.includes(student.id)
-                                  ? {
-                                      ...student,
-                                      practice_completion_status: "not_started",
-                                    }
-                                  : student
-                              )
-                            );
-                            setSelectedStudents([]);
-                            alert(
-                              `${selectedStudents.length}명의 학생을 관리대기로 이동했습니다.`
-                            );
-                          });
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
-                      >
-                        관리대기로 ({selectedStudents.length})
-                      </button>
-                      <button
-                        onClick={() => {
-                          // 실습완료에서 환불완료로 일괄 이동
-                          const updatePromises = selectedStudents.map(
-                            (studentId) =>
-                              supabase
-                                .from("student_applications")
-                                .update({
+                      Promise.all(updatePromises).then(() => {
+                        setStudents((prev) =>
+                          prev.map((student) =>
+                            selectedStudents.includes(student.id)
+                              ? {
+                                  ...student,
+                                  practice_completion_status: "not_started",
+                                }
+                              : student
+                          )
+                        );
+                        setSelectedStudents([]);
+                        alert(
+                          `${selectedStudents.length}명의 학생을 관리대기로 이동했습니다.`
+                        );
+                      });
+                    }}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    관리대기로 ({selectedStudents.length})
+                  </button>
+                  <button
+                    onClick={() => {
+                      // 실습완료에서 환불완료로 일괄 이동
+                      const updatePromises = selectedStudents.map((studentId) =>
+                        supabase
+                          .from("student_applications")
+                          .update({
+                            payment_status: "refunded",
+                            service_payment_status: "환불완료",
+                          })
+                          .eq("id", studentId)
+                      );
+
+                      Promise.all(updatePromises).then(() => {
+                        setStudents((prev) =>
+                          prev.map((student) =>
+                            selectedStudents.includes(student.id)
+                              ? {
+                                  ...student,
                                   payment_status: "refunded",
                                   service_payment_status: "환불완료",
-                                })
-                                .eq("id", studentId)
-                          );
-
-                          Promise.all(updatePromises).then(() => {
-                            setStudents((prev) =>
-                              prev.map((student) =>
-                                selectedStudents.includes(student.id)
-                                  ? {
-                                      ...student,
-                                      payment_status: "refunded",
-                                      service_payment_status: "환불완료",
-                                    }
-                                  : student
-                              )
-                            );
-                            setSelectedStudents([]);
-                            alert(
-                              `${selectedStudents.length}명의 학생을 환불완료로 이동했습니다.`
-                            );
-                          });
-                        }}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                      >
-                        환불완료로 ({selectedStudents.length})
-                      </button>
-                    </>
-                  )}
-                  {activeTab === "refunded" && (
-                    <button
-                      onClick={() => setShowDeleteModal(true)}
-                      className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 text-sm"
-                    >
-                      선택 삭제 ({selectedStudents.length})
-                    </button>
-                  )}
+                                }
+                              : student
+                          )
+                        );
+                        setSelectedStudents([]);
+                        alert(
+                          `${selectedStudents.length}명의 학생을 환불완료로 이동했습니다.`
+                        );
+                      });
+                    }}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    환불완료로 ({selectedStudents.length})
+                  </button>
                 </>
+              )}
+              {activeTab === "refunded" && (
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                    selectedStudents.length > 0
+                      ? "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  disabled={selectedStudents.length === 0}
+                >
+                  선택 삭제 ({selectedStudents.length})
+                </button>
               )}
             </div>
           </div>

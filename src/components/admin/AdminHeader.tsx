@@ -37,16 +37,10 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50"
             >
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
               <div className="hidden md:block text-left">
                 <div className="text-sm font-medium text-gray-900">
                   {user?.email}
                 </div>
-                <div className="text-xs text-gray-500">관리자</div>
               </div>
               <svg
                 className="w-4 h-4 text-gray-400"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase-client";
 
 interface StudentApplicationForm {
   // 학생 입력 필드 (13개)
@@ -39,6 +39,8 @@ export default function StudentApplicationForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>("");
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // 필수 필드 검증 함수
   const isFormValid = () => {
@@ -57,10 +59,12 @@ export default function StudentApplicationForm() {
       "cash_receipt_number",
     ];
 
-    return requiredFields.every((field) => {
+    const fieldsValid = requiredFields.every((field) => {
       const value = formData[field as keyof StudentApplicationForm];
       return value && value.trim() !== "";
     });
+
+    return fieldsValid && privacyAgreed;
   };
 
   const handleInputChange = (
@@ -516,12 +520,42 @@ export default function StudentApplicationForm() {
                       {!formData.cash_receipt_number && (
                         <li>현금영수증 번호</li>
                       )}
+                      {!privacyAgreed && <li>개인정보 수집 및 이용동의</li>}
                     </ul>
                   </div>
                 </div>
               </div>
             </div>
           )}
+
+          {/* 개인정보 수집 및 이용동의 */}
+          <div className="mb-6">
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="privacy-agreement"
+                checked={privacyAgreed}
+                onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <div className="flex-1">
+                <label
+                  htmlFor="privacy-agreement"
+                  className="text-sm text-gray-700"
+                >
+                  <span className="text-red-500">*</span> 개인정보 수집 및
+                  이용에 동의합니다.{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacyModal(true)}
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    자세히 보기
+                  </button>
+                </label>
+              </div>
+            </div>
+          </div>
 
           <button
             type="submit"
@@ -535,6 +569,119 @@ export default function StudentApplicationForm() {
             {isSubmitting ? "제출 중..." : "실습신청 제출"}
           </button>
         </form>
+
+        {/* 개인정보 수집 및 이용동의 모달 */}
+        {showPrivacyModal && (
+          <div className="fixed inset-0 bg-[#00000080] z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    개인정보 수집 및 이용동의
+                  </h3>
+                  <button
+                    onClick={() => setShowPrivacyModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="max-h-96 overflow-y-auto text-sm text-gray-700 space-y-4">
+                  <p>
+                    수집하는 개인정보의 항목은 빠른 학습상담 신청을 위해 아래와
+                    같은 개인정보를 수집하고 있습니다.
+                  </p>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      수집항목
+                    </h4>
+                    <p>이름, 연락처, 상담내용</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      개인정보 수집방법
+                    </h4>
+                    <p>홈페이지 (문의하기)</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      개인정보의 수집 및 이용목적
+                    </h4>
+                    <p>
+                      회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.
+                    </p>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      <li>
+                        회원 관리 : 회원제 서비스 이용에 따른 본인확인, 개인
+                        식별, 가입 의사 확인, 불만처리 등 민원처리, 고지사항
+                        전달
+                      </li>
+                      <li>
+                        마케팅 및 광고에 활용 : 신규 서비스(제품) 개발 및 특화,
+                        이벤트 등 광고성 정보 전달
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      개인정보의 보유 및 이용기간
+                    </h4>
+                    <p>2년</p>
+                    <p className="mt-1">
+                      회사는 개인정보 수집 및 이용목적이 달성된 후에는 예외 없이
+                      해당 정보를 지체 없이 파기합니다.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      동의 거부권
+                    </h4>
+                    <p>
+                      귀하께서는 개인정보 제공 및 활용에 거부할 권리가 있습니다.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      거부에 따른 불이익
+                    </h4>
+                    <p>
+                      위 제공사항은 상담에 반드시 필요한 사항으로 거부하실 경우
+                      상담이 불가능함을 알려드립니다.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6">
+                  <button
+                    onClick={() => setShowPrivacyModal(false)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
