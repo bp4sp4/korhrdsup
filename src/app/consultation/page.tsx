@@ -30,7 +30,7 @@ export default function StudentApplicationForm() {
     student_name: "",
     gender: "",
     phone: "",
-    birth_date: "1960-01-01", // 기본값을 1970년 1월 1일로 설정
+    birth_date: "", // 기본값을 빈 문자열로 설정
     address: "",
     preferred_practice_date: "",
     grade_report_date: "",
@@ -240,21 +240,10 @@ export default function StudentApplicationForm() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* 모바일 달력 위치 조정을 위한 CSS */}
+      {/* 모바일 달력 가시성 및 사용자 피드백 개선을 위한 CSS */}
       <style jsx global>{`
+        /* 모바일에서 달력이 가려지지 않도록 설정 */
         @media (max-width: 768px) {
-          /* 모바일에서 달력이 상단에 고정되도록 조정 */
-          input[type="date"]::-webkit-calendar-picker-indicator {
-            position: relative;
-            z-index: 1;
-          }
-
-          /* 달력 팝업이 화면 상단에 나타나도록 조정 */
-          input[type="date"]:focus {
-            position: relative;
-            z-index: 10;
-          }
-
           /* 모바일에서 입력 필드들의 최소 너비 설정 */
           .mobile-input {
             min-width: 100%;
@@ -266,24 +255,36 @@ export default function StudentApplicationForm() {
             gap: 1rem;
           }
 
-          /* 모바일에서 달력이 화면 상단에 나타나도록 조정 */
-          input[type="date"] {
-            position: relative;
+          /* 모바일에서 달력 입력 필드가 포커스될 때 시각적 강조 */
+          input[type="date"]:focus {
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
           }
 
-          /* 모바일에서 달력 팝업 위치 조정 */
-          input[type="date"]::-webkit-datetime-edit {
-            position: relative;
-            z-index: 1;
+          /* 모바일에서 달력 입력 필드의 라벨도 강조 */
+          label:has(+ input[type="date"]:focus) {
+            color: #3b82f6;
+            font-weight: 600;
           }
 
           /* 모바일에서 달력 버튼 위치 조정 */
           input[type="date"]::-webkit-calendar-picker-indicator {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 2;
+            z-index: 1001;
+            background: transparent;
+            cursor: pointer;
+          }
+
+          /* 모바일에서 달력 팝업이 다른 요소들 위에 표시되도록 */
+          input[type="date"]::-webkit-datetime-edit {
+            z-index: 1000;
+          }
+
+          /* 모바일에서 달력이 활성화될 때 */
+          input[type="date"]::-webkit-calendar-picker-indicator:active {
+            z-index: 1002;
           }
         }
       `}</style>
