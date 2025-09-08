@@ -46,6 +46,13 @@ export default function StudentApplicationForm() {
   const [submitStatus, setSubmitStatus] = useState<string>("");
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentDateField, setCurrentDateField] = useState<string>("");
+  const [tempDate, setTempDate] = useState({
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    day: new Date().getDate(),
+  });
 
   // 필수 필드 검증 함수
   const isFormValid = () => {
@@ -160,6 +167,60 @@ export default function StudentApplicationForm() {
     return `${year}년 ${month}월 ${day}일`;
   };
 
+  // 모바일 날짜 선택기 열기
+  const openDatePicker = (fieldName: string) => {
+    const currentValue = formData[fieldName as keyof StudentApplicationForm];
+    if (currentValue) {
+      const date = new Date(currentValue);
+      setTempDate({
+        year: date.getFullYear(),
+        month: date.getMonth() + 1,
+        day: date.getDate(),
+      });
+    }
+    setCurrentDateField(fieldName);
+    setShowDatePicker(true);
+  };
+
+  // 모바일 날짜 선택기 닫기
+  const closeDatePicker = () => {
+    setShowDatePicker(false);
+    setCurrentDateField("");
+  };
+
+  // 날짜 적용
+  const applyDate = () => {
+    const dateString = `${tempDate.year}-${tempDate.month
+      .toString()
+      .padStart(2, "0")}-${tempDate.day.toString().padStart(2, "0")}`;
+    setFormData((prev) => ({
+      ...prev,
+      [currentDateField]: dateString,
+    }));
+    closeDatePicker();
+  };
+
+  // 년도 배열 생성
+  const generateYears = () => {
+    const years = [];
+    const currentYear = new Date().getFullYear();
+    for (let i = currentYear - 50; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  // 월 배열 생성
+  const generateMonths = () => {
+    return Array.from({ length: 12 }, (_, i) => i + 1);
+  };
+
+  // 일 배열 생성
+  const generateDays = () => {
+    const daysInMonth = new Date(tempDate.year, tempDate.month, 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -240,11 +301,10 @@ export default function StudentApplicationForm() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      {/* 모바일 달력 가시성 및 사용자 피드백 개선을 위한 CSS */}
+      {/* 모바일 UI 개선을 위한 CSS */}
       <style jsx global>{`
-        /* 모바일에서 달력이 가려지지 않도록 설정 */
+        /* 모바일에서 입력 필드들의 최소 너비 설정 */
         @media (max-width: 768px) {
-          /* 모바일에서 입력 필드들의 최소 너비 설정 */
           .mobile-input {
             min-width: 100%;
             max-width: 100%;
@@ -255,36 +315,13 @@ export default function StudentApplicationForm() {
             gap: 1rem;
           }
 
-          /* 모바일에서 달력 입력 필드가 포커스될 때 시각적 강조 */
-          input[type="date"]:focus {
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
-            background: #f0f9ff;
-            border: 2px solid #3b82f6;
-            border-radius: 8px;
+          /* 모바일 날짜 선택 버튼 스타일 */
+          button[type="button"] {
+            transition: all 0.2s ease;
           }
 
-          /* 모바일에서 달력 입력 필드의 라벨도 강조 */
-          label:has(+ input[type="date"]:focus) {
-            color: #3b82f6;
-            font-weight: 600;
-          }
-
-          /* 모바일에서 달력 버튼 위치 조정 */
-          input[type="date"]::-webkit-calendar-picker-indicator {
-            z-index: 1001;
-            background: transparent;
-            cursor: pointer;
-          }
-
-          /* 모바일에서 달력 팝업이 다른 요소들 위에 표시되도록 */
-          input[type="date"]::-webkit-datetime-edit {
-            z-index: 1000;
-          }
-
-          /* 모바일에서 달력이 활성화될 때 */
-          input[type="date"]::-webkit-calendar-picker-indicator:active {
-            z-index: 1002;
+          button[type="button"]:active {
+            transform: scale(0.98);
           }
         }
       `}</style>
@@ -355,6 +392,7 @@ export default function StudentApplicationForm() {
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   생년월일 *
                 </label>
+                {/* 데스크톱용 날짜 입력 */}
                 <input
                   type="date"
                   name="birth_date"
@@ -363,8 +401,18 @@ export default function StudentApplicationForm() {
                   min="1960-01-01"
                   max="2010-12-31"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
+                  className="hidden md:block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 />
+                {/* 모바일용 날짜 선택 버튼 */}
+                <button
+                  type="button"
+                  onClick={() => openDatePicker("birth_date")}
+                  className="md:hidden w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base text-left bg-white"
+                >
+                  {formData.birth_date
+                    ? formatDateForDisplay(formData.birth_date)
+                    : "생년월일을 선택하세요"}
+                </button>
               </div>
             </div>
 
@@ -388,6 +436,7 @@ export default function StudentApplicationForm() {
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   현장실습 희망날짜 *
                 </label>
+                {/* 데스크톱용 날짜 입력 */}
                 <input
                   type="date"
                   name="preferred_practice_date"
@@ -396,21 +445,42 @@ export default function StudentApplicationForm() {
                   min={new Date().toISOString().split("T")[0]}
                   max="2030-12-31"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
+                  className="hidden md:block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 />
+                {/* 모바일용 날짜 선택 버튼 */}
+                <button
+                  type="button"
+                  onClick={() => openDatePicker("preferred_practice_date")}
+                  className="md:hidden w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base text-left bg-white"
+                >
+                  {formData.preferred_practice_date
+                    ? formatDateForDisplay(formData.preferred_practice_date)
+                    : "희망날짜를 선택하세요"}
+                </button>
               </div>
 
               <div>
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   성적보고일
                 </label>
+                {/* 데스크톱용 날짜 입력 */}
                 <input
                   type="date"
                   name="grade_report_date"
                   value={formData.grade_report_date}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
+                  className="hidden md:block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base"
                 />
+                {/* 모바일용 날짜 선택 버튼 */}
+                <button
+                  type="button"
+                  onClick={() => openDatePicker("grade_report_date")}
+                  className="md:hidden w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base text-left bg-white"
+                >
+                  {formData.grade_report_date
+                    ? formatDateForDisplay(formData.grade_report_date)
+                    : "성적보고일을 선택하세요"}
+                </button>
               </div>
             </div>
 
@@ -672,6 +742,129 @@ export default function StudentApplicationForm() {
               >
                 홈으로
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 모바일 날짜 선택기 */}
+      {showDatePicker && (
+        <div className="fixed inset-0  flex items-end z-50 md:hidden">
+          <div className="bg-white rounded-t-lg w-full max-h-[70vh] overflow-hidden">
+            {/* 헤더 */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <h3 className="text-lg font-semibold">
+                {currentDateField === "birth_date" && "생년월일 선택"}
+                {currentDateField === "preferred_practice_date" &&
+                  "희망날짜 선택"}
+                {currentDateField === "grade_report_date" && "성적보고일 선택"}
+              </h3>
+              <button
+                onClick={closeDatePicker}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* 날짜 선택 영역 */}
+            <div className="p-4">
+              <div className="flex justify-center space-x-4 mb-6">
+                {/* 년도 선택 */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    년도
+                  </label>
+                  <div className="h-32 overflow-y-auto border rounded-md">
+                    {generateYears().map((year) => (
+                      <div
+                        key={year}
+                        className={`p-2 text-center cursor-pointer hover:bg-gray-100 ${
+                          tempDate.year === year
+                            ? "bg-blue-100 text-blue-600 font-semibold"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setTempDate((prev) => ({ ...prev, year }))
+                        }
+                      >
+                        {year}년
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 월 선택 */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    월
+                  </label>
+                  <div className="h-32 overflow-y-auto border rounded-md">
+                    {generateMonths().map((month) => (
+                      <div
+                        key={month}
+                        className={`p-2 text-center cursor-pointer hover:bg-gray-100 ${
+                          tempDate.month === month
+                            ? "bg-blue-100 text-blue-600 font-semibold"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setTempDate((prev) => ({ ...prev, month }))
+                        }
+                      >
+                        {month}월
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 일 선택 */}
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    일
+                  </label>
+                  <div className="h-32 overflow-y-auto border rounded-md">
+                    {generateDays().map((day) => (
+                      <div
+                        key={day}
+                        className={`p-2 text-center cursor-pointer hover:bg-gray-100 ${
+                          tempDate.day === day
+                            ? "bg-blue-100 text-blue-600 font-semibold"
+                            : ""
+                        }`}
+                        onClick={() =>
+                          setTempDate((prev) => ({ ...prev, day }))
+                        }
+                      >
+                        {day}일
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* 선택된 날짜 표시 */}
+              <div className="text-center mb-4 p-3 bg-gray-50 rounded-md">
+                <span className="text-lg font-semibold">
+                  {tempDate.year}년 {tempDate.month}월 {tempDate.day}일
+                </span>
+              </div>
+
+              {/* 버튼 */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={closeDatePicker}
+                  className="flex-1 py-3 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={applyDate}
+                  className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  확인
+                </button>
+              </div>
             </div>
           </div>
         </div>
