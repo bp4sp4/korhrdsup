@@ -2,6 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Header from "@/components/Header";
 
 interface StudentApplicationForm {
   // 학생 입력 필드 (13개)
@@ -21,6 +24,8 @@ interface StudentApplicationForm {
 }
 
 export default function StudentApplicationForm() {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<StudentApplicationForm>({
     student_name: "",
     gender: "",
@@ -40,7 +45,6 @@ export default function StudentApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>("");
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   // 필수 필드 검증 함수
   const isFormValid = () => {
@@ -232,460 +236,351 @@ export default function StudentApplicationForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold text-center mb-8">실습신청서</h1>
+    <div className="min-h-screen bg-white">
+      <Header />
 
-        {submitStatus && (
-          <div
-            className={`mb-6 p-4 rounded-md ${
-              submitStatus.includes("✅")
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {submitStatus}
-          </div>
-        )}
+      {/* 메인 컨텐츠 */}
+      <div className="bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-8">
+          <h1 className="text-3xl font-bold text-center mb-8">실습신청서</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* 기본 정보 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                학생이름 *
-              </label>
-              <input
-                type="text"
-                name="student_name"
-                value={formData.student_name}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                성별 *
-              </label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">선택하세요</option>
-                <option value="남성">남성</option>
-                <option value="여성">여성</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                연락처 * (010-0000-0000)
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handlePhoneChange}
-                required
-                placeholder="010-0000-0000"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                생년월일 *
-              </label>
-              <input
-                type="date"
-                name="birth_date"
-                value={formData.birth_date}
-                onChange={handleInputChange}
-                min="1960-01-01"
-                max="2010-12-31"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              거주지 주소 * (전북 00시 00동 00아파트)
-            </label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              required
-              placeholder="전북 00시 00동 00아파트"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                현장실습 희망날짜 *
-              </label>
-              <input
-                type="date"
-                name="preferred_practice_date"
-                value={formData.preferred_practice_date}
-                onChange={handleInputChange}
-                min={new Date().toISOString().split("T")[0]}
-                max="2030-12-31"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                성적보고일
-              </label>
-              <input
-                type="date"
-                name="grade_report_date"
-                value={formData.grade_report_date}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                희망학기 *
-              </label>
-              <select
-                name="preferred_semester"
-                value={formData.preferred_semester}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">선택하세요</option>
-                <option value="26년도 1학기">26년도 1학기</option>
-                <option value="26년도 2학기">26년도 2학기</option>
-                <option value="27년도 1학기">27년도 1학기</option>
-                <option value="27년도 2학기">27년도 2학기</option>
-                <option value="28년도 1학기">28년도 1학기</option>
-                <option value="28년도 2학기">28년도 2학기</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                실습종류 *
-              </label>
-              <select
-                name="practice_type"
-                value={formData.practice_type}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">선택하세요</option>
-                <option value="사회복지사 실습 160시간">
-                  사회복지사 실습 160시간
-                </option>
-                <option value="사회복지사 실습 120시간">
-                  사회복지사 실습 120시간
-                </option>
-                <option value="보육교사 실습 240시간">
-                  보육교사 실습 240시간
-                </option>
-                <option value="평생교육사 실습 160시간">
-                  평생교육사 실습 160시간
-                </option>
-                <option value="한국어교원 실습">한국어교원 실습</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                희망요일 (8시간고정) *
-              </label>
-              <select
-                name="preferred_day"
-                value={formData.preferred_day}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">선택하세요</option>
-                <option value="평일">평일</option>
-                <option value="주말">주말</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                에듀바이저스 이름 *
-              </label>
-              <input
-                type="text"
-                name="advisor_name"
-                value={formData.advisor_name}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                자차여부 *
-              </label>
-              <select
-                name="car_available"
-                value={formData.car_available}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">선택하세요</option>
-                <option value="O">O</option>
-                <option value="X">X</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                현금영수증 번호 *
-              </label>
-              <input
-                type="text"
-                name="cash_receipt_number"
-                value={formData.cash_receipt_number}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* 필수 필드 안내 메시지 */}
-          {!isFormValid() && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-yellow-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800">
-                    모든 필수 항목을 입력해주세요
-                  </h3>
-                  <div className="mt-2 text-sm text-yellow-700">
-                    <p>
-                      아래 항목들을 모두 입력하셔야 신청서 제출이 가능합니다.
-                      <br />
-                      혹시 입력 중 모르는 부분이 있으시면 에듀바이저 담당자에게
-                      문의해 주시기 바랍니다.
-                    </p>
-                    <ul className="mt-1 list-disc list-inside">
-                      {!formData.student_name && <li>학생이름</li>}
-                      {!formData.gender && <li>성별</li>}
-                      {!formData.phone && <li>연락처</li>}
-                      {!formData.birth_date && <li>생년월일</li>}
-                      {!formData.address && <li>거주지 주소</li>}
-                      {!formData.preferred_practice_date && (
-                        <li>현장실습 희망날짜</li>
-                      )}
-                      {!formData.preferred_semester && <li>희망학기</li>}
-                      {!formData.practice_type && <li>실습종류</li>}
-                      {!formData.preferred_day && <li>희망요일</li>}
-                      {!formData.advisor_name && <li>에듀바이저스 이름</li>}
-                      {!formData.car_available && <li>자차여부</li>}
-                      {!formData.cash_receipt_number && (
-                        <li>현금영수증 번호</li>
-                      )}
-                      {!privacyAgreed && <li>개인정보 수집 및 이용동의</li>}
-                    </ul>
-                  </div>
-                </div>
-              </div>
+          {submitStatus && (
+            <div
+              className={`mb-6 p-4 rounded-md ${
+                submitStatus.includes("✅")
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {submitStatus}
             </div>
           )}
 
-          {/* 개인정보 수집 및 이용동의 */}
-          <div className="mb-6">
-            <div className="flex items-start space-x-3">
-              <input
-                type="checkbox"
-                id="privacy-agreement"
-                checked={privacyAgreed}
-                onChange={(e) => setPrivacyAgreed(e.target.checked)}
-                className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <div className="flex-1">
-                <label
-                  htmlFor="privacy-agreement"
-                  className="text-sm text-gray-700"
-                >
-                  <span className="text-red-500">*</span> 개인정보 수집 및
-                  이용에 동의합니다.{" "}
-                  <button
-                    type="button"
-                    onClick={() => setShowPrivacyModal(true)}
-                    className="text-blue-600 underline hover:text-blue-800"
-                  >
-                    자세히 보기
-                  </button>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 기본 정보 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  학생이름 *
                 </label>
+                <input
+                  type="text"
+                  name="student_name"
+                  value={formData.student_name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  성별 *
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">선택하세요</option>
+                  <option value="남성">남성</option>
+                  <option value="여성">여성</option>
+                </select>
               </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting || !isFormValid()}
-            className={`w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              isFormValid() && !isSubmitting
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-            }`}
-          >
-            {isSubmitting ? "제출 중..." : "실습신청 제출"}
-          </button>
-        </form>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  연락처 * (010-0000-0000)
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  required
+                  placeholder="010-0000-0000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-        {/* 개인정보 수집 및 이용동의 모달 */}
-        {showPrivacyModal && (
-          <div className="fixed inset-0 bg-[#00000080] z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    개인정보 수집 및 이용동의
-                  </h3>
-                  <button
-                    onClick={() => setShowPrivacyModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  생년월일 *
+                </label>
+                <input
+                  type="date"
+                  name="birth_date"
+                  value={formData.birth_date}
+                  onChange={handleInputChange}
+                  min="1960-01-01"
+                  max="2010-12-31"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                거주지 주소 * (전북 00시 00동 00아파트)
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                required
+                placeholder="전북 00시 00동 00아파트"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  현장실습 희망날짜 *
+                </label>
+                <input
+                  type="date"
+                  name="preferred_practice_date"
+                  value={formData.preferred_practice_date}
+                  onChange={handleInputChange}
+                  min={new Date().toISOString().split("T")[0]}
+                  max="2030-12-31"
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  성적보고일
+                </label>
+                <input
+                  type="date"
+                  name="grade_report_date"
+                  value={formData.grade_report_date}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  희망학기 *
+                </label>
+                <select
+                  name="preferred_semester"
+                  value={formData.preferred_semester}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">선택하세요</option>
+                  <option value="26년도 1학기">26년도 1학기</option>
+                  <option value="26년도 2학기">26년도 2학기</option>
+                  <option value="27년도 1학기">27년도 1학기</option>
+                  <option value="27년도 2학기">27년도 2학기</option>
+                  <option value="28년도 1학기">28년도 1학기</option>
+                  <option value="28년도 2학기">28년도 2학기</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  실습종류 *
+                </label>
+                <select
+                  name="practice_type"
+                  value={formData.practice_type}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">선택하세요</option>
+                  <option value="사회복지사 실습 160시간">
+                    사회복지사 실습 160시간
+                  </option>
+                  <option value="사회복지사 실습 120시간">
+                    사회복지사 실습 120시간
+                  </option>
+                  <option value="보육교사 실습 240시간">
+                    보육교사 실습 240시간
+                  </option>
+                  <option value="평생교육사 실습 160시간">
+                    평생교육사 실습 160시간
+                  </option>
+                  <option value="한국어교원 실습">한국어교원 실습</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  희망요일 (8시간고정) *
+                </label>
+                <select
+                  name="preferred_day"
+                  value={formData.preferred_day}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">선택하세요</option>
+                  <option value="평일">평일</option>
+                  <option value="주말">주말</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  에듀바이저스 이름 *
+                </label>
+                <input
+                  type="text"
+                  name="advisor_name"
+                  value={formData.advisor_name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  자차여부 *
+                </label>
+                <select
+                  name="car_available"
+                  value={formData.car_available}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">선택하세요</option>
+                  <option value="O">O</option>
+                  <option value="X">X</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  현금영수증 번호 *
+                </label>
+                <input
+                  type="text"
+                  name="cash_receipt_number"
+                  value={formData.cash_receipt_number}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* 필수 필드 안내 메시지 */}
+            {!isFormValid() && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
                     <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                      className="h-5 w-5 text-yellow-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
                     >
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
                       />
                     </svg>
-                  </button>
-                </div>
-
-                <div className="max-h-96 overflow-y-auto text-sm text-gray-700 space-y-4">
-                  <p>
-                    수집하는 개인정보의 항목은 빠른 학습상담 신청을 위해 아래와
-                    같은 개인정보를 수집하고 있습니다.
-                  </p>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      수집항목
-                    </h4>
-                    <p>이름, 연락처, 상담내용</p>
                   </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      개인정보 수집방법
-                    </h4>
-                    <p>홈페이지 (문의하기)</p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      개인정보의 수집 및 이용목적
-                    </h4>
-                    <p>
-                      회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.
-                    </p>
-                    <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>
-                        회원 관리 : 회원제 서비스 이용에 따른 본인확인, 개인
-                        식별, 가입 의사 확인, 불만처리 등 민원처리, 고지사항
-                        전달
-                      </li>
-                      <li>
-                        마케팅 및 광고에 활용 : 신규 서비스(제품) 개발 및 특화,
-                        이벤트 등 광고성 정보 전달
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      개인정보의 보유 및 이용기간
-                    </h4>
-                    <p>2년</p>
-                    <p className="mt-1">
-                      회사는 개인정보 수집 및 이용목적이 달성된 후에는 예외 없이
-                      해당 정보를 지체 없이 파기합니다.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      동의 거부권
-                    </h4>
-                    <p>
-                      귀하께서는 개인정보 제공 및 활용에 거부할 권리가 있습니다.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      거부에 따른 불이익
-                    </h4>
-                    <p>
-                      위 제공사항은 상담에 반드시 필요한 사항으로 거부하실 경우
-                      상담이 불가능함을 알려드립니다.
-                    </p>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-yellow-800">
+                      모든 필수 항목을 입력해주세요
+                    </h3>
+                    <div className="mt-2 text-sm text-yellow-700">
+                      <p>
+                        아래 항목들을 모두 입력하셔야 신청서 제출이 가능합니다.
+                        <br />
+                        혹시 입력 중 모르는 부분이 있으시면 에듀바이저
+                        담당자에게 문의해 주시기 바랍니다.
+                      </p>
+                      <ul className="mt-1 list-disc list-inside">
+                        {!formData.student_name && <li>학생이름</li>}
+                        {!formData.gender && <li>성별</li>}
+                        {!formData.phone && <li>연락처</li>}
+                        {!formData.birth_date && <li>생년월일</li>}
+                        {!formData.address && <li>거주지 주소</li>}
+                        {!formData.preferred_practice_date && (
+                          <li>현장실습 희망날짜</li>
+                        )}
+                        {!formData.preferred_semester && <li>희망학기</li>}
+                        {!formData.practice_type && <li>실습종류</li>}
+                        {!formData.preferred_day && <li>희망요일</li>}
+                        {!formData.advisor_name && <li>에듀바이저스 이름</li>}
+                        {!formData.car_available && <li>자차여부</li>}
+                        {!formData.cash_receipt_number && (
+                          <li>현금영수증 번호</li>
+                        )}
+                        {!privacyAgreed && <li>개인정보 수집 및 이용동의</li>}
+                      </ul>
+                    </div>
                   </div>
                 </div>
+              </div>
+            )}
 
-                <div className="flex justify-end space-x-3 mt-6">
-                  <button
-                    onClick={() => setShowPrivacyModal(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            {/* 개인정보 수집 및 이용동의 */}
+            <div className="mb-6">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="privacy-agreement"
+                  checked={privacyAgreed}
+                  onChange={(e) => setPrivacyAgreed(e.target.checked)}
+                  className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <div className="flex-1">
+                  <label
+                    htmlFor="privacy-agreement"
+                    className="text-sm text-gray-700"
                   >
-                    닫기
-                  </button>
+                    <span className="text-red-500">*</span> 개인정보 수집 및
+                    이용에 동의합니다.{" "}
+                    <Link
+                      href="/privacy-info"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      실습 신청 안내 보기
+                    </Link>
+                  </label>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !isFormValid()}
+              className={`w-full py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isFormValid() && !isSubmitting
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-400 text-gray-200 cursor-not-allowed"
+              }`}
+            >
+              {isSubmitting ? "제출 중..." : "실습신청 제출"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

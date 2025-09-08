@@ -3,6 +3,40 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
 
+// 금액 포맷팅 유틸리티 함수들
+const formatCurrency = (value: string): string => {
+  // 숫자만 추출
+  const numericValue = value.replace(/[^0-9]/g, "");
+  if (!numericValue) return "";
+
+  // 0으로 시작하는 경우 처리 (예: "01" -> "1")
+  const cleanNumeric = parseInt(numericValue).toString();
+  if (cleanNumeric === "0") return "0";
+
+  // 콤마 추가
+  const formatted = parseInt(cleanNumeric).toLocaleString();
+  return formatted;
+};
+
+const parseCurrency = (value: string): string => {
+  // 콤마와 "원" 제거하고 숫자만 반환
+  return value.replace(/[^0-9]/g, "");
+};
+
+const displayCurrency = (value: string): string => {
+  if (!value || value.trim() === "") return "";
+  const numericValue = parseCurrency(value);
+  if (!numericValue || numericValue.trim() === "") return "";
+  return parseInt(numericValue).toLocaleString();
+};
+
+const displayCurrencyWithWon = (value: string): string => {
+  if (!value || value.trim() === "") return "";
+  const numericValue = parseCurrency(value);
+  if (!numericValue || numericValue.trim() === "") return "";
+  return `${parseInt(numericValue).toLocaleString()}원`;
+};
+
 // 실습교육원 인터페이스
 interface EducationCenter {
   id: string;
@@ -320,6 +354,11 @@ export default function InstitutionsPage() {
             value !== undefined
         )
       );
+
+      // cost 필드가 있으면 숫자만 저장
+      if (cleanFormData.cost) {
+        cleanFormData.cost = parseCurrency(cleanFormData.cost as string);
+      }
 
       if (editingInstitution) {
         const { error } = await (supabase as any)
@@ -1285,7 +1324,9 @@ export default function InstitutionsPage() {
                             {institution.schedule_type}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
-                            {institution.cost}
+                            {institution.cost
+                              ? displayCurrencyWithWon(institution.cost)
+                              : "-"}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px]">
                             <button
@@ -1593,7 +1634,7 @@ export default function InstitutionsPage() {
 
           {/* 실습기관 편집 모달 */}
           {showInstitutionModal && (
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="fixed inset-0 bg-[#00000080] overflow-y-auto h-full w-full z-50">
               <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
                 <div className="mt-3">
                   <div className="flex justify-between items-center mb-4">
@@ -1665,18 +1706,42 @@ export default function InstitutionsPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         비용
                       </label>
-                      <input
-                        type="text"
-                        value={institutionForm.cost || ""}
-                        onChange={(e) =>
-                          setInstitutionForm({
-                            ...institutionForm,
-                            cost: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 50,000원"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={institutionForm.cost || ""}
+                          onChange={(e) => {
+                            const inputValue = e.target.value;
+
+                            // 모든 비숫자 문자 제거 (콤마, 원, 공백 등)
+                            const cleanValue = inputValue.replace(
+                              /[^0-9]/g,
+                              ""
+                            );
+
+                            // 빈 값이면 빈 문자열로 설정
+                            if (!cleanValue) {
+                              setInstitutionForm({
+                                ...institutionForm,
+                                cost: "",
+                              });
+                              return;
+                            }
+
+                            // 숫자가 있으면 콤마만 추가 (원은 제외)
+                            const formatted = formatCurrency(cleanValue);
+                            setInstitutionForm({
+                              ...institutionForm,
+                              cost: formatted,
+                            });
+                          }}
+                          className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="예: 5,000,000"
+                        />
+                        <span className="absolute right-3 top-2 text-sm text-gray-500">
+                          원
+                        </span>
+                      </div>
                     </div>
 
                     <div className="md:col-span-2">

@@ -1,28 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-center items-center h-16">
-            <div className="flex items-center">
-              <div className="w-5 h-5  flex items-center justify-center">
-                <img
-                  src="/logo.png"
-                  alt="한평생실습지원센터 로고"
-                  className="rounded-lg"
-                />
-              </div>
-              <h1 className="ml-2 text-xl font-bold text-gray-900">
-                한평생실습지원
-              </h1>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header showHomeLink={false} />
 
       {/* 히어로 섹션 */}
       <section className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-20">
@@ -58,7 +42,10 @@ export default function Home() {
                 </svg>
                 실습신청 시작하기
               </Link>
-              <button className="inline-flex items-center px-8 py-4 bg-white text-gray-700 text-lg font-semibold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
+              <Link
+                href="/privacy-info"
+                className="inline-flex items-center px-8 py-4 bg-white text-gray-700 text-lg font-semibold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
                 <svg
                   className="w-6 h-6 mr-2"
                   fill="none"
@@ -73,7 +60,7 @@ export default function Home() {
                   />
                 </svg>
                 자세히 알아보기
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -255,28 +242,7 @@ export default function Home() {
       </section>
 
       {/* 푸터 */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                <Image
-                  src="/logo.png"
-                  alt="한평생실습지원센터 로고"
-                  width={32}
-                  height={32}
-                  className="rounded-lg"
-                />
-              </div>
-              <h3 className="ml-3 text-xl font-bold">한평생실습지원센터</h3>
-            </div>
-
-            <p className="text-gray-500 text-sm">
-              &copy; 2024 한평생실습지원센터. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
