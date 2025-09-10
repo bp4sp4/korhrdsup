@@ -967,7 +967,7 @@ export default function StudentsPage() {
               <table className="w-full min-w-[2400px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
                       <input
                         type="checkbox"
                         checked={
@@ -978,65 +978,65 @@ export default function StudentsPage() {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                      관리
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       학생명
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       성별
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       연락처
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       생년월일
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">
                       주소
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       희망실습일
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       희망학기
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       실습종류
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       희망요일
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       자차여부
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       에듀바이저
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       현금영수증번호
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       실습담당자
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       실습교육원
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       현장실습기관
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[140px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[140px]">
                       서비스비용 입금여부
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                       상담내용
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                       특이사항
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       신청일
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
-                      관리
                     </th>
                   </tr>
                 </thead>
@@ -1051,7 +1051,7 @@ export default function StudentsPage() {
                           : ""
                       }`}
                     >
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[50px]">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[50px] text-center">
                         <input
                           type="checkbox"
                           checked={selectedStudents.includes(student.id)}
@@ -1059,64 +1059,7 @@ export default function StudentsPage() {
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[100px]">
-                        {student.student_name}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px]">
-                        {student.gender}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.phone}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
-                        {student.birth_date}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[200px]">
-                        {student.address}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.preferred_practice_date}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.preferred_semester}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
-                        {student.practice_type}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px]">
-                        {student.preferred_day}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px]">
-                        {student.car_available}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.advisor_name}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.cash_receipt_number || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.practice_manager || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.practice_education_center || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
-                        {student.practice_institution || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[140px]">
-                        {student.service_payment_status || "-"}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px]">
-                        {student.consultation_content || "-"}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px]">
-                        {student.special_notes || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
-                        {formatDate(student.created_at)}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[120px]">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px] text-center">
                         <div className="flex flex-col space-y-1">
                           <button
                             onClick={() => handleEdit(student)}
@@ -1263,6 +1206,63 @@ export default function StudentsPage() {
                             </button>
                           )}
                         </div>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[100px] text-center">
+                        {student.student_name}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
+                        {student.gender}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.phone}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
+                        {student.birth_date}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[200px] text-center">
+                        {student.address}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.preferred_practice_date}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.preferred_semester}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
+                        {student.practice_type}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
+                        {student.preferred_day}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
+                        {student.car_available}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.advisor_name}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.cash_receipt_number || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.practice_manager || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.practice_education_center || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.practice_institution || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[140px] text-center">
+                        {student.service_payment_status || "-"}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
+                        {student.consultation_content || "-"}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
+                        {student.special_notes || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
+                        {formatDate(student.created_at)}
                       </td>
                     </tr>
                   ))}
