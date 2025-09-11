@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "한평생실습지원센터",
+  title: "한평생실습지원",
   description:
     "실습신청을 간편하게! 한평생실습지원센터에서 안전하고 신뢰할 수 있는 실습 환경을 제공합니다.",
   openGraph: {
-    title: "한평생실습지원센터",
+    title: "한평생실습지원",
     description:
       "실습신청을 간편하게! 한평생실습지원센터에서 안전하고 신뢰할 수 있는 실습 환경을 제공합니다.",
     images: [
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "한평생실습지원센터",
+    title: "한평생실습지원",
     description:
       "실습신청을 간편하게! 한평생실습지원센터에서 안전하고 신뢰할 수 있는 실습 환경을 제공합니다.",
     images: ["https://korhrdsup.vercel.app/ogimage.png"],
