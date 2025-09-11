@@ -1484,38 +1484,6 @@ export default function StudentsPage() {
                           >
                             수정
                           </button>
-                          {activeTab === "refunded" && (
-                            <button
-                              onClick={() => {
-                                // 환불에서 관리대기로 복구
-                                const studentId = student.id;
-                                supabase
-                                  .from("student_applications")
-                                  .update({
-                                    payment_status: "pending",
-                                    service_payment_status: null,
-                                  })
-                                  .eq("id", studentId)
-                                  .then(() => {
-                                    setStudents((prev) =>
-                                      prev.map((s) =>
-                                        s.id === studentId
-                                          ? {
-                                              ...s,
-                                              payment_status: "pending",
-                                              service_payment_status: null,
-                                            }
-                                          : s
-                                      )
-                                    );
-                                    alert("관리대기로 복구되었습니다.");
-                                  });
-                              }}
-                              className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
-                            >
-                              관리대기로
-                            </button>
-                          )}
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">

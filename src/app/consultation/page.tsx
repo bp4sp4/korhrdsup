@@ -603,7 +603,7 @@ export default function StudentApplicationForm() {
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   현금영수증 번호 *
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <input
                     type="text"
                     name="cash_receipt_number"
@@ -613,13 +613,15 @@ export default function StudentApplicationForm() {
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
                   />
                   {formData.phone.trim() && (
-                    <button
-                      type="button"
-                      onClick={copyPhoneToCashReceipt}
-                      className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap"
-                    >
-                      번호와 같아요
-                    </button>
+                    <div className="flex flex-col sm:items-end">
+                      <button
+                        type="button"
+                        onClick={copyPhoneToCashReceipt}
+                        className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap w-full sm:w-auto"
+                      >
+                        휴대폰 번호와 같아요
+                      </button>
+                    </div>
                   )}
                 </div>
                 {cashReceiptError && (

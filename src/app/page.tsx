@@ -25,10 +25,10 @@ export default function Home() {
               확인 후 순차적으로 섭외해 드립니다.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link
                 href="/consultation"
-                className="inline-flex items-center px-8 py-4 bg-blue-500 text-white text-lg font-semibold rounded-2xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                className="inline-flex items-center md:px-35 px-18 py-6 bg-blue-500 text-white text-xl font-semibold rounded-2xl hover:bg-blue-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
               >
                 <svg
                   className="w-6 h-6 mr-2"
@@ -44,25 +44,6 @@ export default function Home() {
                   />
                 </svg>
                 실습신청 시작하기
-              </Link>
-              <Link
-                href="/privacy-info"
-                className="inline-flex items-center px-8 py-4 bg-white text-gray-700 text-lg font-semibold rounded-2xl border border-gray-200 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <svg
-                  className="w-6 h-6 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                자세히 알아보기
               </Link>
             </div>
           </div>
@@ -225,7 +206,7 @@ export default function Home() {
           </p>
           <Link
             href="/consultation"
-            className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-2xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            className="inline-flex items-center px-8 py-4 bg-white text-blue-600 text-lg font-semibold rounded-2xl hover:bg-gray-50   "
           >
             <svg
               className="w-6 h-6 mr-2"

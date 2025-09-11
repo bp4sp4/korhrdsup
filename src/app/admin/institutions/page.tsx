@@ -1658,10 +1658,7 @@ export default function InstitutionsPage() {
                               : "-"}
                           </td>
                           <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
-                            <div
-                              className="max-w-[150px] truncate"
-                              title={institution.special_notes}
-                            >
+                            <div className="whitespace-normal break-words">
                               {institution.special_notes || "-"}
                             </div>
                           </td>

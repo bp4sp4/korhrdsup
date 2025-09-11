@@ -1086,16 +1086,7 @@ function AdminDashboard() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        * 상담일자
-                      </label>
-                      <div className="text-sm text-gray-900">
-                        {new Date(
-                          selectedMemo.consultation_date
-                        ).toLocaleString("ko-KR")}
-                      </div>
-                    </div>
+                    <div></div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1217,7 +1208,7 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  관련인물
+                  회원이름
                 </label>
                 <input
                   type="text"
@@ -1330,7 +1321,7 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  관련인물
+                  회원이름
                 </label>
                 <input
                   type="text"
