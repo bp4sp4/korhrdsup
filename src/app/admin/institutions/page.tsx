@@ -1129,6 +1129,9 @@ export default function InstitutionsPage() {
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                          관리
+                        </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           실습교육원명
                         </th>
@@ -1153,9 +1156,6 @@ export default function InstitutionsPage() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           세미나 횟수
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
-                          관리
-                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -1168,6 +1168,14 @@ export default function InstitutionsPage() {
                               onChange={() => handleEducationSelect(center.id)}
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px] text-center">
+                            <button
+                              onClick={() => handleEducationEdit(center)}
+                              className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
+                            >
+                              수정
+                            </button>
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
                             {center.website_url ? (
@@ -1218,14 +1226,6 @@ export default function InstitutionsPage() {
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
                             {center.seminar_count}
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px]">
-                            <button
-                              onClick={() => handleEducationEdit(center)}
-                              className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
-                            >
-                              수정
-                            </button>
                           </td>
                         </tr>
                       ))}
@@ -1576,6 +1576,9 @@ export default function InstitutionsPage() {
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                          관리
+                        </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                           기관명
                         </th>
@@ -1600,9 +1603,6 @@ export default function InstitutionsPage() {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           특이사항
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
-                          관리
-                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -1619,6 +1619,14 @@ export default function InstitutionsPage() {
                               }
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px] text-left">
+                            <button
+                              onClick={() => handleInstitutionEdit(institution)}
+                              className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
+                            >
+                              수정
+                            </button>
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
                             {institution.institution_name}
@@ -1650,14 +1658,6 @@ export default function InstitutionsPage() {
                             >
                               {institution.special_notes || "-"}
                             </div>
-                          </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px]">
-                            <button
-                              onClick={() => handleInstitutionEdit(institution)}
-                              className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
-                            >
-                              수정
-                            </button>
                           </td>
                         </tr>
                       ))}
