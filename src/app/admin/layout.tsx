@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { getCurrentUser, getSession } from "@/lib/auth";
+import { AdminAuth } from "@/lib/admin-auth";
 import { supabase } from "@/lib/supabase-client";
 import { useRouter, usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
@@ -47,14 +48,14 @@ export default function AdminLayout({
           return { success: false, error: "No session" };
         }
 
-        const { user, error: userError } = await getCurrentUser();
+        const user = await AdminAuth.getCurrentUser();
 
-        if (userError || !user) {
-          console.log("User error:", userError);
-          return { success: false, error: userError };
+        if (!user) {
+          console.log("User not found");
+          return { success: false, error: "User not found" };
         }
 
-        console.log("User authenticated:", user.email);
+        console.log("User authenticated:", user.name);
         return { success: true, user };
       };
 

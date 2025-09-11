@@ -117,16 +117,8 @@ export class AdminAuth {
       // admin_users 테이블에서 사용자 정보 조회
       const { data: adminUser, error } = await supabase
         .from("admin_users")
-        .select(
-          `
-          *,
-          admin_roles!admin_users_role_id_fkey (
-            role_name
-          )
-        `
-        )
+        .select("*")
         .eq("id", user.id)
-        .eq("is_active", true)
         .single();
 
       console.log("getCurrentUser - admin user query result:", {
@@ -136,10 +128,13 @@ export class AdminAuth {
 
       if (error || !adminUser) return null;
 
+      // 이메일에서 이름 추출 (예: korhrdsv@korhrdoffice.com -> korhrdsv)
+      const emailName = user.email?.split("@")[0] || "관리자";
+
       const result = {
         id: adminUser.id,
-        name: adminUser.username,
-        position_name: adminUser.admin_roles?.role_name || "알 수 없음",
+        name: adminUser.name || emailName,
+        position_name: "관리자",
       };
 
       console.log("getCurrentUser - returning:", result);

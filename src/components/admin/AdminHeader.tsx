@@ -39,7 +39,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
             >
               <div className="hidden md:block text-left">
                 <div className="text-sm font-medium text-gray-900">
-                  {user?.email}
+                  {user?.name || user?.email}
                 </div>
               </div>
               <svg
