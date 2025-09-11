@@ -20,7 +20,7 @@ export default function Header({
             <img
               src="/logo.png"
               alt="한평생실습지원센터 로고"
-              className="h-8 sm:h-10 w-auto object-contain"
+              className="h-6 sm:h-6 w-auto object-contain"
             />
           </Link>
 
