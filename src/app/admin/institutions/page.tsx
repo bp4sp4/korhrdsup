@@ -1116,7 +1116,7 @@ export default function InstitutionsPage() {
                   <table className="w-full min-w-[1400px] divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
                           <input
                             type="checkbox"
                             checked={
@@ -1129,38 +1129,41 @@ export default function InstitutionsPage() {
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                           관리
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           실습교육원명
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           실습종류
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           교육원 위치
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           실습가능 지역
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                           학기
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           법
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           세미나 요일
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           세미나 횟수
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {paginatedEducationCenters.map((center) => (
-                        <tr key={center.id} className="hover:bg-gray-50">
+                        <tr
+                          key={center.id}
+                          className="hover:bg-gray-50 text-center"
+                        >
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[50px]">
                             <input
                               type="checkbox"
@@ -1177,7 +1180,7 @@ export default function InstitutionsPage() {
                               수정
                             </button>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px] text-center">
                             {center.website_url ? (
                               <a
                                 href={center.website_url}
@@ -1206,25 +1209,25 @@ export default function InstitutionsPage() {
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {center.practice_type}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px] text-center">
                             {center.location}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px] text-center">
                             {center.practice_available_area}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                             {center.semester}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {center.law_type}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {center.seminar_day}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {center.seminar_count}
                           </td>
                         </tr>
@@ -1562,7 +1565,7 @@ export default function InstitutionsPage() {
                   <table className="w-full min-w-[1600px] divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
                           <input
                             type="checkbox"
                             checked={
@@ -1576,38 +1579,41 @@ export default function InstitutionsPage() {
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                           관리
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                           기관명
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           대표자
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           기관주소
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                           기관연락처
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           선정유효기간
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           기관유형
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           비용
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                           특이사항
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {paginatedPracticeInstitutions.map((institution) => (
-                        <tr key={institution.id} className="hover:bg-gray-50">
+                        <tr
+                          key={institution.id}
+                          className="hover:bg-gray-50 text-center"
+                        >
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[50px]">
                             <input
                               type="checkbox"
@@ -1620,7 +1626,7 @@ export default function InstitutionsPage() {
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px] text-left">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px] text-center">
                             <button
                               onClick={() => handleInstitutionEdit(institution)}
                               className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
@@ -1628,30 +1634,30 @@ export default function InstitutionsPage() {
                               수정
                             </button>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                             {institution.institution_name}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {institution.representative}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px] text-center">
                             {institution.practice_area}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                             {institution.contact}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px] text-center">
                             {institution.application_valid_period}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {institution.institution_type}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                             {institution.cost
                               ? displayCurrencyWithWon(institution.cost)
                               : "-"}
                           </td>
-                          <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
                             <div
                               className="max-w-[150px] truncate"
                               title={institution.special_notes}
