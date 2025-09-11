@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
+import { AdminAuth } from "@/lib/admin-auth";
+import { AdminLogger } from "@/lib/admin-logger";
 
 // 금액 포맷팅 유틸리티 함수들
 const formatCurrency = (value: string): string => {
@@ -56,11 +58,14 @@ interface EducationCenter {
 // 실습기관 인터페이스
 interface PracticeInstitution {
   id: string;
-  institution_name: string; // 실습기관명
-  location: string; // 실습기관 위치
-  practice_area: string; // 실습지역
-  schedule_type: string; // 실습일정 종류
+  institution_name: string; // 기관명
+  representative: string; // 대표자
+  practice_area: string; // 기관주소
+  institution_type: string; // 기관유형
+  contact: string; // 기관연락처
+  application_valid_period: string; // 선정유효기간
   cost: string; // 비용
+  special_notes: string; // 특이사항
   created_at: string;
   updated_at: string;
 }
@@ -111,10 +116,13 @@ export default function InstitutionsPage() {
 
   const [institutionFilters, setInstitutionFilters] = useState({
     institution_name: "",
-    location: "",
+    representative: "",
     practice_area: "",
-    schedule_type: "",
+    institution_type: "",
+    contact: "",
+    application_valid_period: "",
     cost: "",
+    special_notes: "",
   });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -128,10 +136,17 @@ export default function InstitutionsPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [canDelete, setCanDelete] = useState(false);
 
   useEffect(() => {
     fetchData();
+    checkDeletePermission();
   }, []);
+
+  const checkDeletePermission = async () => {
+    const hasDeletePermission = await AdminAuth.canDelete();
+    setCanDelete(hasDeletePermission);
+  };
 
   const fetchData = async () => {
     try {
@@ -269,6 +284,16 @@ export default function InstitutionsPage() {
       );
       setSelectedEducation([]);
       setError(null);
+
+      // 활동 로그 기록
+      for (const educationId of ids) {
+        await AdminLogger.logDelete(
+          "education_centers",
+          educationId,
+          {},
+          `실습교육원 삭제 (${ids.length}개 일괄 삭제)`
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
       // 실패 시 데이터 다시 로드
@@ -323,9 +348,11 @@ export default function InstitutionsPage() {
       // 필수 필드 검증
       const requiredFields = [
         "institution_name",
-        "location",
+        "representative",
         "practice_area",
-        "schedule_type",
+        "institution_type",
+        "contact",
+        "application_valid_period",
       ];
       const missingFields = requiredFields.filter(
         (field) => !institutionForm[field as keyof typeof institutionForm]
@@ -339,10 +366,13 @@ export default function InstitutionsPage() {
       // 빈 값 제거 및 유효한 필드만 포함
       const validFields = [
         "institution_name",
-        "location",
+        "representative",
         "practice_area",
-        "schedule_type",
+        "institution_type",
+        "contact",
+        "application_valid_period",
         "cost",
+        "special_notes",
       ];
 
       const cleanFormData = Object.fromEntries(
@@ -408,6 +438,16 @@ export default function InstitutionsPage() {
       );
       setSelectedInstitutions([]);
       setError(null);
+
+      // 활동 로그 기록
+      for (const institutionId of ids) {
+        await AdminLogger.logDelete(
+          "practice_institutions",
+          institutionId,
+          {},
+          `실습기관 삭제 (${ids.length}개 일괄 삭제)`
+        );
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
       // 실패 시 데이터 다시 로드
@@ -482,16 +522,34 @@ export default function InstitutionsPage() {
     (institution) => {
       const matchesSearch =
         !searchTerm ||
-        institution.institution_name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        institution.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        institution.practice_area
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        institution.schedule_type
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
+        (institution.institution_name &&
+          institution.institution_name
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.representative &&
+          institution.representative
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.practice_area &&
+          institution.practice_area
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.institution_type &&
+          institution.institution_type
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.contact &&
+          institution.contact
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.application_valid_period &&
+          institution.application_valid_period
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())) ||
+        (institution.special_notes &&
+          institution.special_notes
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()));
 
       const matchesFilters = Object.entries(institutionFilters).every(
         ([key, value]) => {
@@ -529,10 +587,13 @@ export default function InstitutionsPage() {
   const resetInstitutionFilters = () => {
     setInstitutionFilters({
       institution_name: "",
-      location: "",
+      representative: "",
       practice_area: "",
-      schedule_type: "",
+      institution_type: "",
+      contact: "",
+      application_valid_period: "",
       cost: "",
+      special_notes: "",
     });
   };
 
@@ -887,7 +948,7 @@ export default function InstitutionsPage() {
                   >
                     실습교육원 추가
                   </button>
-                  {selectedEducation.length > 0 && (
+                  {selectedEducation.length > 0 && canDelete && (
                     <button
                       onClick={() => handleEducationDelete(selectedEducation)}
                       disabled={loading}
@@ -1155,50 +1216,46 @@ export default function InstitutionsPage() {
                 {/* 필터 드롭다운 */}
                 {showInstitutionFilters && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          실습일정 종류
-                        </label>
-                        <select
-                          value={institutionFilters.schedule_type}
-                          onChange={(e) =>
-                            setInstitutionFilters({
-                              ...institutionFilters,
-                              schedule_type: e.target.value,
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        >
-                          <option value="">전체</option>
-                          <option value="주말">주말</option>
-                          <option value="평일">평일</option>
-                          <option value="조율">조율</option>
-                          <option value="야간">야간</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          기관 위치
+                          기관명
                         </label>
                         <input
                           type="text"
-                          value={institutionFilters.location}
+                          value={institutionFilters.institution_name}
                           onChange={(e) =>
                             setInstitutionFilters({
                               ...institutionFilters,
-                              location: e.target.value,
+                              institution_name: e.target.value,
                             })
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          placeholder="예: 서울시 강서구"
+                          placeholder="예: 강서구 사회복지관"
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          실습지역
+                          대표자
+                        </label>
+                        <input
+                          type="text"
+                          value={institutionFilters.representative}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              representative: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="예: 홍길동"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          기관주소
                         </label>
                         <input
                           type="text"
@@ -1211,6 +1268,105 @@ export default function InstitutionsPage() {
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                           placeholder="예: 서울시 강서구"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          기관유형
+                        </label>
+                        <select
+                          value={institutionFilters.institution_type}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              institution_type: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="">전체</option>
+                          <option value="사회복지관">사회복지관</option>
+                          <option value="종합사회복지관">종합사회복지관</option>
+                          <option value="노인복지관">노인복지관</option>
+                          <option value="장애인복지관">장애인복지관</option>
+                          <option value="아동복지관">아동복지관</option>
+                          <option value="여성복지관">여성복지관</option>
+                          <option value="의료기관">의료기관</option>
+                          <option value="교육기관">교육기관</option>
+                          <option value="기타">기타</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          기관연락처
+                        </label>
+                        <input
+                          type="text"
+                          value={institutionFilters.contact}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              contact: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="예: 02-1234-5678"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          선정유효기간
+                        </label>
+                        <input
+                          type="text"
+                          value={institutionFilters.application_valid_period}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              application_valid_period: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="예: 2024.01.01 ~ 2024.12.31"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          비용
+                        </label>
+                        <input
+                          type="text"
+                          value={institutionFilters.cost}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              cost: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="예: 5,000,000"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          특이사항
+                        </label>
+                        <input
+                          type="text"
+                          value={institutionFilters.special_notes}
+                          onChange={(e) =>
+                            setInstitutionFilters({
+                              ...institutionFilters,
+                              special_notes: e.target.value,
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          placeholder="예: 주말 실습 가능"
                         />
                       </div>
                     </div>
@@ -1236,7 +1392,7 @@ export default function InstitutionsPage() {
                   >
                     실습기관 추가
                   </button>
-                  {selectedInstitutions.length > 0 && (
+                  {selectedInstitutions.length > 0 && canDelete && (
                     <button
                       onClick={() =>
                         handleInstitutionDelete(selectedInstitutions)
@@ -1259,7 +1415,7 @@ export default function InstitutionsPage() {
                   className="overflow-x-auto max-w-full"
                   style={{ maxWidth: "100vw" }}
                 >
-                  <table className="w-full min-w-[1000px] divide-y divide-gray-200">
+                  <table className="w-full min-w-[1600px] divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
@@ -1276,20 +1432,29 @@ export default function InstitutionsPage() {
                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
                         </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                          실습기관명
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                          기관 위치
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                          실습지역
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                          기관명
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
-                          실습일정
+                          대표자
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                          기관주소
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                          기관연락처
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                          선정유효기간
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                          기관유형
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                           비용
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                          특이사항
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                           관리
@@ -1311,22 +1476,36 @@ export default function InstitutionsPage() {
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
                             {institution.institution_name}
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
-                            {institution.location}
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
+                            {institution.representative}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
                             {institution.practice_area}
                           </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px]">
+                            {institution.contact}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[150px]">
+                            {institution.application_valid_period}
+                          </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
-                            {institution.schedule_type}
+                            {institution.institution_type}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px]">
                             {institution.cost
                               ? displayCurrencyWithWon(institution.cost)
                               : "-"}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px]">
+                            <div
+                              className="max-w-[150px] truncate"
+                              title={institution.special_notes}
+                            >
+                              {institution.special_notes || "-"}
+                            </div>
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium min-w-[80px]">
                             <button
@@ -1664,7 +1843,7 @@ export default function InstitutionsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        실습기관명
+                        기관명 <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1682,24 +1861,83 @@ export default function InstitutionsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        실습일정 종류
+                        대표자 <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        value={institutionForm.schedule_type || ""}
+                      <input
+                        type="text"
+                        value={institutionForm.representative || ""}
                         onChange={(e) =>
                           setInstitutionForm({
                             ...institutionForm,
-                            schedule_type: e.target.value,
+                            representative: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 홍길동"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        기관유형 <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={institutionForm.institution_type || ""}
+                        onChange={(e) =>
+                          setInstitutionForm({
+                            ...institutionForm,
+                            institution_type: e.target.value,
                           })
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">선택하세요</option>
-                        <option value="주말">주말</option>
-                        <option value="평일">평일</option>
-                        <option value="조율">조율</option>
-                        <option value="야간">야간</option>
+                        <option value="사회복지관">사회복지관</option>
+                        <option value="종합사회복지관">종합사회복지관</option>
+                        <option value="노인복지관">노인복지관</option>
+                        <option value="장애인복지관">장애인복지관</option>
+                        <option value="아동복지관">아동복지관</option>
+                        <option value="여성복지관">여성복지관</option>
+                        <option value="의료기관">의료기관</option>
+                        <option value="교육기관">교육기관</option>
+                        <option value="기타">기타</option>
                       </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        기관연락처 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={institutionForm.contact || ""}
+                        onChange={(e) =>
+                          setInstitutionForm({
+                            ...institutionForm,
+                            contact: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 02-1234-5678"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        선정유효기간 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={institutionForm.application_valid_period || ""}
+                        onChange={(e) =>
+                          setInstitutionForm({
+                            ...institutionForm,
+                            application_valid_period: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 2024.01.01 ~ 2024.12.31"
+                      />
                     </div>
 
                     <div>
@@ -1746,25 +1984,7 @@ export default function InstitutionsPage() {
 
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        실습기관 위치
-                      </label>
-                      <input
-                        type="text"
-                        value={institutionForm.location || ""}
-                        onChange={(e) =>
-                          setInstitutionForm({
-                            ...institutionForm,
-                            location: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 서울시 강서구 화곡동"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        실습지역
+                        기관주소 <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1777,6 +1997,24 @@ export default function InstitutionsPage() {
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="예: 서울시 강서구"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        특이사항
+                      </label>
+                      <textarea
+                        value={institutionForm.special_notes || ""}
+                        onChange={(e) =>
+                          setInstitutionForm({
+                            ...institutionForm,
+                            special_notes: e.target.value,
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="예: 주말 실습 가능, 특별 요구사항 등"
+                        rows={3}
                       />
                     </div>
                   </div>

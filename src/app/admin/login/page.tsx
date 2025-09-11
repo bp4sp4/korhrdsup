@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "@/lib/auth";
+import { AdminAuth } from "@/lib/admin-auth";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
@@ -17,40 +17,33 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const { data, error } = await signIn(email, password);
+      const { success, error, user } = await AdminAuth.login(email, password);
 
-      if (error) {
+      if (!success || error) {
         console.error("Login error:", error);
-        setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+        setError(
+          error || "로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요."
+        );
         return;
       }
 
-      if (data.user) {
-        console.log("Login successful, user:", data.user.email);
+      if (user) {
+        console.log(
+          "Admin login successful, user:",
+          user.username,
+          "role:",
+          user.role?.role_name
+        );
 
-        // 세션이 설정될 때까지 대기 (최대 3초)
-        let sessionConfirmed = false;
-        for (let i = 0; i < 6; i++) {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          const { session, error: sessionError } = await getSession();
-
-          if (session && !sessionError) {
-            console.log("Session confirmed, redirecting...");
-            sessionConfirmed = true;
-            break;
-          }
-
-          console.log(`Session check attempt ${i + 1}/6`);
-        }
-
-        if (!sessionConfirmed) {
-          console.error("Session setup timeout");
-          setError(
-            "세션 설정에 시간이 오래 걸립니다. 페이지를 새로고침해주세요."
-          );
+        // 관리자 권한 확인
+        const currentAdmin = await AdminAuth.getCurrentAdmin();
+        if (!currentAdmin) {
+          console.error("Admin session not confirmed");
+          setError("관리자 세션 설정에 문제가 있습니다. 다시 시도해주세요.");
           return;
         }
+
+        console.log("Admin session confirmed, redirecting...");
 
         // 로그인 성공 시 학생관리 페이지로 이동 (강제 새로고침)
         window.location.href = "/admin/students";

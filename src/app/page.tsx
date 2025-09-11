@@ -150,7 +150,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">
-                1:1 맞춤 섬외
+                1:1 맞춤 섭외
               </h3>
               <p className="text-gray-600">
                 상황에 맞춰 가장 적합하고 가까운 곳으로

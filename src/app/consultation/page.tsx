@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase-client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 
@@ -48,11 +47,25 @@ export default function StudentApplicationForm() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentDateField, setCurrentDateField] = useState<string>("");
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [cashReceiptError, setCashReceiptError] = useState<string>("");
   const [tempDate, setTempDate] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
     day: new Date().getDate(),
   });
+
+  // 연락처 번호를 현금영수증번호에 복사하는 함수
+  const copyPhoneToCashReceipt = () => {
+    const phone = formData.phone.trim();
+    if (phone) {
+      setFormData((prev) => ({
+        ...prev,
+        cash_receipt_number: phone,
+      }));
+      setCashReceiptError("연락처 번호가 복사되었습니다.");
+    }
+  };
 
   // 필수 필드 검증 함수
   const isFormValid = () => {
@@ -461,7 +474,7 @@ export default function StudentApplicationForm() {
 
               <div>
                 <label className="block text-base font-medium text-gray-700 mb-2">
-                  성적보고일
+                  성적보고일 *
                 </label>
                 {/* 데스크톱용 날짜 입력 */}
                 <input
@@ -590,14 +603,36 @@ export default function StudentApplicationForm() {
                 <label className="block text-base font-medium text-gray-700 mb-2">
                   현금영수증 번호 *
                 </label>
-                <input
-                  type="text"
-                  name="cash_receipt_number"
-                  value={formData.cash_receipt_number}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="cash_receipt_number"
+                    value={formData.cash_receipt_number}
+                    onChange={handleInputChange}
+                    required
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base mobile-input"
+                  />
+                  {formData.phone.trim() && (
+                    <button
+                      type="button"
+                      onClick={copyPhoneToCashReceipt}
+                      className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap"
+                    >
+                      번호와 같아요
+                    </button>
+                  )}
+                </div>
+                {cashReceiptError && (
+                  <p
+                    className={`text-sm mt-1 ${
+                      cashReceiptError.includes("복사되었습니다")
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {cashReceiptError}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -620,7 +655,7 @@ export default function StudentApplicationForm() {
                   </div>
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-yellow-800">
-                      모든 필수 항목을 입력해주세요
+                      모든 항목이 필수 항목입니다.
                     </h3>
                     <div className="mt-2 text-sm text-yellow-700">
                       <p>
@@ -671,12 +706,13 @@ export default function StudentApplicationForm() {
                   >
                     <span className="text-red-500">*</span> 개인정보 수집 및
                     이용에 동의합니다.{" "}
-                    <Link
-                      href="/privacy-info"
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacyModal(true)}
                       className="text-blue-600 underline hover:text-blue-800"
                     >
-                      실습 신청 안내 보기
-                    </Link>
+                      개인정보동의
+                    </button>
                   </label>
                 </div>
               </div>
@@ -865,6 +901,93 @@ export default function StudentApplicationForm() {
                   확인
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 개인정보동의 팝업 모달 */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                개인정보 수집 및 이용 동의
+              </h2>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4 text-sm text-gray-700">
+              <div>
+                <h3 className="font-semibold mb-2">
+                  1. 개인정보 수집 및 이용 목적
+                </h3>
+                <p>실습 신청 및 관리, 상담 서비스 제공, 실습 기관 배정</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">
+                  2. 수집하는 개인정보 항목
+                </h3>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>이름, 성별, 연락처, 생년월일, 주소</li>
+                  <li>
+                    희망실습일, 희망학기, 실습종류, 희망요일, 에듀바이저,
+                    자차사용여부, 현금영수증번호
+                  </li>
+                </ul>
+                <p className="text-red-600 font-medium mt-2">
+                  ※ 모든 항목은 필수 입력 사항입니다.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">
+                  3. 개인정보 보유 및 이용 기간
+                </h3>
+                <p>실습 완료 후 3년간 보관 (관련 법령에 따라 보관)</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">4. 개인정보 제3자 제공</h3>
+                <p>실습 기관 배정을 위한 실습 기관에만 제공</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">
+                  5. 개인정보 처리 거부 권리
+                </h3>
+                <p>
+                  개인정보 수집 및 이용에 동의하지 않을 수 있으나, 이 경우 실습
+                  신청이 제한될 수 있습니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                확인
+              </button>
             </div>
           </div>
         </div>

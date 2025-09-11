@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase-client";
+import { AdminAuth } from "@/lib/admin-auth";
+import { AdminLogger } from "@/lib/admin-logger";
 
 interface Student {
   id: string;
@@ -40,6 +42,12 @@ export default function StudentsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showConsultationModal, setShowConsultationModal] = useState(false);
+  const [consultingStudent, setConsultingStudent] = useState<Student | null>(
+    null
+  );
+  const [consultationContent, setConsultationContent] = useState("");
+  const [canDelete, setCanDelete] = useState(false);
 
   // 탭 상태
   const [activeTab, setActiveTab] = useState<
@@ -61,6 +69,7 @@ export default function StudentsPage() {
     preferred_day: "",
     car_available: "",
     practice_manager: "",
+    advisor_name: "",
     service_payment_status: "",
     created_at_from: "",
     created_at_to: "",
@@ -68,7 +77,13 @@ export default function StudentsPage() {
 
   useEffect(() => {
     fetchStudents();
+    checkDeletePermission();
   }, []);
+
+  const checkDeletePermission = async () => {
+    const hasDeletePermission = await AdminAuth.canDelete();
+    setCanDelete(hasDeletePermission);
+  };
 
   const fetchStudents = async () => {
     try {
@@ -108,6 +123,30 @@ export default function StudentsPage() {
 
       if (error) throw error;
 
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "student_applications",
+            editingStudent.id,
+            editingStudent,
+            editForm,
+            `학생 수정: ${
+              editForm.student_name || editingStudent.student_name
+            }`,
+            undefined,
+            navigator.userAgent
+          );
+        } catch (logError) {
+          console.error("학생 수정 - 로그 기록 실패:", logError);
+        }
+      }
+
       // 데이터 새로고침
       await fetchStudents();
       setEditingStudent(null);
@@ -122,6 +161,48 @@ export default function StudentsPage() {
     setEditingStudent(null);
     setEditForm({});
     setShowEditModal(false);
+  };
+
+  const handleConsultationClick = (student: Student) => {
+    setConsultingStudent(student);
+    setConsultationContent(student.consultation_content || "");
+    setShowConsultationModal(true);
+  };
+
+  const handleConsultationSave = async () => {
+    if (!consultingStudent) return;
+
+    try {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({ consultation_content: consultationContent })
+        .eq("id", consultingStudent.id);
+
+      if (error) throw error;
+
+      // 로컬 상태 업데이트
+      setStudents((prev) =>
+        prev.map((student) =>
+          student.id === consultingStudent.id
+            ? { ...student, consultation_content: consultationContent }
+            : student
+        )
+      );
+
+      setShowConsultationModal(false);
+      setConsultingStudent(null);
+      setConsultationContent("");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "상담내용 저장에 실패했습니다."
+      );
+    }
+  };
+
+  const handleConsultationCancel = () => {
+    setShowConsultationModal(false);
+    setConsultingStudent(null);
+    setConsultationContent("");
   };
 
   const handleSelectStudent = (studentId: string) => {
@@ -221,6 +302,7 @@ export default function StudentsPage() {
       preferred_day: "",
       car_available: "",
       practice_manager: "",
+      advisor_name: "",
       service_payment_status: "",
       created_at_from: "",
       created_at_to: "",
@@ -241,6 +323,31 @@ export default function StudentsPage() {
         .in("id", selectedStudents);
 
       if (error) throw error;
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          for (const studentId of selectedStudents) {
+            const student = students.find((s) => s.id === studentId);
+            await AdminLogger.logActivity(
+              currentUser.id,
+              currentUser.name || "알 수 없음",
+              currentUser.position_name || "알 수 없음",
+              "UPDATE",
+              "student_applications",
+              studentId,
+              student,
+              { payment_status: "paid", service_payment_status: "입금완료" },
+              `학생 입금완료 처리: ${student?.student_name || studentId}`,
+              undefined,
+              navigator.userAgent
+            );
+          }
+        } catch (logError) {
+          console.error("입금완료 처리 - 로그 기록 실패:", logError);
+        }
+      }
 
       // 로컬 상태 업데이트
       setStudents((prev) =>
@@ -278,6 +385,31 @@ export default function StudentsPage() {
 
       if (error) throw error;
 
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          for (const studentId of selectedStudents) {
+            const student = students.find((s) => s.id === studentId);
+            await AdminLogger.logActivity(
+              currentUser.id,
+              currentUser.name || "알 수 없음",
+              currentUser.position_name || "알 수 없음",
+              "UPDATE",
+              "student_applications",
+              studentId,
+              student,
+              { payment_status: "pending", service_payment_status: null },
+              `학생 입금취소 처리: ${student?.student_name || studentId}`,
+              undefined,
+              navigator.userAgent
+            );
+          }
+        } catch (logError) {
+          console.error("입금취소 처리 - 로그 기록 실패:", logError);
+        }
+      }
+
       // 로컬 상태 업데이트
       setStudents((prev) =>
         prev.map((student) =>
@@ -313,6 +445,31 @@ export default function StudentsPage() {
 
       if (error) throw error;
 
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          for (const studentId of selectedStudents) {
+            const student = students.find((s) => s.id === studentId);
+            await AdminLogger.logActivity(
+              currentUser.id,
+              currentUser.name || "알 수 없음",
+              currentUser.position_name || "알 수 없음",
+              "UPDATE",
+              "student_applications",
+              studentId,
+              student,
+              { practice_completion_status: "completed" },
+              `학생 실습완료 처리: ${student?.student_name || studentId}`,
+              undefined,
+              navigator.userAgent
+            );
+          }
+        } catch (logError) {
+          console.error("실습완료 처리 - 로그 기록 실패:", logError);
+        }
+      }
+
       // 로컬 상태 업데이트
       setStudents((prev) =>
         prev.map((student) =>
@@ -347,6 +504,34 @@ export default function StudentsPage() {
         .in("id", selectedStudents);
 
       if (error) throw error;
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          for (const studentId of selectedStudents) {
+            const student = students.find((s) => s.id === studentId);
+            await AdminLogger.logActivity(
+              currentUser.id,
+              currentUser.name || "알 수 없음",
+              currentUser.position_name || "알 수 없음",
+              "UPDATE",
+              "student_applications",
+              studentId,
+              student,
+              {
+                payment_status: "refunded",
+                service_payment_status: "환불완료",
+              },
+              `학생 환불완료 처리: ${student?.student_name || studentId}`,
+              undefined,
+              navigator.userAgent
+            );
+          }
+        } catch (logError) {
+          console.error("환불완료 처리 - 로그 기록 실패:", logError);
+        }
+      }
 
       // 로컬 상태 업데이트
       setStudents((prev) =>
@@ -440,6 +625,26 @@ export default function StudentsPage() {
       setSelectedStudents([]);
       setShowDeleteModal(false);
       setError(null);
+
+      // 활동 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        for (const studentId of selectedStudents) {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name,
+            currentUser.position_name,
+            "DELETE",
+            "student_applications",
+            studentId,
+            {},
+            null,
+            `학생 삭제: ID ${studentId}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
+      }
 
       alert(`${deleteCount}개의 학생 신청서가 삭제되었습니다.`);
     } catch (err) {
@@ -759,6 +964,24 @@ export default function StudentsPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                      에듀바이저
+                    </label>
+                    <input
+                      type="text"
+                      value={filters.advisor_name}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          advisor_name: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="예: 김에듀바이저"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       서비스비용 입금여부
                     </label>
                     <select
@@ -948,7 +1171,7 @@ export default function StudentsPage() {
                   </button>
                 </>
               )}
-              {selectedStudents.length > 0 && (
+              {selectedStudents.length > 0 && canDelete && (
                 <button
                   onClick={() => setShowDeleteModal(true)}
                   className="px-4 py-2 rounded-lg transition-colors text-sm bg-red-600 text-white hover:bg-red-700"
@@ -964,7 +1187,7 @@ export default function StudentsPage() {
               className="overflow-x-auto max-w-full"
               style={{ maxWidth: "100vw" }}
             >
-              <table className="w-full min-w-[2400px] divide-y divide-gray-200">
+              <table className="w-full min-w-[2000px] divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[50px]">
@@ -981,20 +1204,23 @@ export default function StudentsPage() {
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       관리
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                      실습담당자
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                      에듀바이저
+                    </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       학생명
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       성별
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
-                      연락처
-                    </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       생년월일
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">
-                      주소
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
+                      연락처
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       희망실습일
@@ -1008,35 +1234,17 @@ export default function StudentsPage() {
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       희망요일
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
+                      특이사항
+                    </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[80px]">
                       자차여부
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
-                      에듀바이저
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
-                      현금영수증번호
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
-                      실습담당자
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       실습교육원
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[120px]">
                       현장실습기관
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[140px]">
-                      서비스비용 입금여부
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                      상담내용
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
-                      특이사항
-                    </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
-                      신청일
                     </th>
                   </tr>
                 </thead>
@@ -1067,112 +1275,6 @@ export default function StudentsPage() {
                           >
                             수정
                           </button>
-                          {activeTab === "pending" &&
-                            student.payment_status === "paid" && (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    const studentId = student.id;
-                                    supabase
-                                      .from("student_applications")
-                                      .update({
-                                        payment_status: "pending",
-                                        service_payment_status: null,
-                                      })
-                                      .eq("id", studentId)
-                                      .then(() => {
-                                        setStudents((prev) =>
-                                          prev.map((s) =>
-                                            s.id === studentId
-                                              ? {
-                                                  ...s,
-                                                  payment_status: "pending",
-                                                  service_payment_status: null,
-                                                }
-                                              : s
-                                          )
-                                        );
-                                        alert("입금대기로 되돌렸습니다.");
-                                      });
-                                  }}
-                                  className="text-orange-600 hover:text-orange-900 text-xs whitespace-nowrap"
-                                >
-                                  입금취소
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleMarkAsPracticeCompleted()
-                                  }
-                                  className="text-green-600 hover:text-green-900 text-xs whitespace-nowrap"
-                                >
-                                  실습완료
-                                </button>
-                              </>
-                            )}
-                          {activeTab === "completed" && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  // 실습완료에서 관리대기로 복구
-                                  const studentId = student.id;
-                                  supabase
-                                    .from("student_applications")
-                                    .update({
-                                      practice_completion_status: "not_started",
-                                    })
-                                    .eq("id", studentId)
-                                    .then(() => {
-                                      setStudents((prev) =>
-                                        prev.map((s) =>
-                                          s.id === studentId
-                                            ? {
-                                                ...s,
-                                                practice_completion_status:
-                                                  "not_started",
-                                              }
-                                            : s
-                                        )
-                                      );
-                                      alert("관리대기로 이동했습니다.");
-                                    });
-                                }}
-                                className="text-blue-600 hover:text-blue-900 text-xs whitespace-nowrap"
-                              >
-                                관리대기로
-                              </button>
-                              <button
-                                onClick={() => {
-                                  // 실습완료에서 환불완료로 이동
-                                  const studentId = student.id;
-                                  supabase
-                                    .from("student_applications")
-                                    .update({
-                                      payment_status: "refunded",
-                                      service_payment_status: "환불완료",
-                                    })
-                                    .eq("id", studentId)
-                                    .then(() => {
-                                      setStudents((prev) =>
-                                        prev.map((s) =>
-                                          s.id === studentId
-                                            ? {
-                                                ...s,
-                                                payment_status: "refunded",
-                                                service_payment_status:
-                                                  "환불완료",
-                                              }
-                                            : s
-                                        )
-                                      );
-                                      alert("환불완료로 이동했습니다.");
-                                    });
-                                }}
-                                className="text-red-600 hover:text-red-900 text-xs whitespace-nowrap"
-                              >
-                                환불완료로
-                              </button>
-                            </>
-                          )}
                           {activeTab === "refunded" && (
                             <button
                               onClick={() => {
@@ -1207,20 +1309,28 @@ export default function StudentsPage() {
                           )}
                         </div>
                       </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.practice_manager || "-"}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        {student.advisor_name}
+                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 min-w-[100px] text-center">
                         {student.student_name}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
                         {student.gender}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
-                        {student.phone}
-                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                         {student.birth_date}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[200px] text-center">
-                        {student.address}
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
+                        <button
+                          onClick={() => handleConsultationClick(student)}
+                          className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                        >
+                          {student.phone}
+                        </button>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                         {student.preferred_practice_date}
@@ -1234,35 +1344,17 @@ export default function StudentsPage() {
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
                         {student.preferred_day}
                       </td>
+                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
+                        {student.special_notes || "-"}
+                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[80px] text-center">
                         {student.car_available}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
-                        {student.advisor_name}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
-                        {student.cash_receipt_number || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
-                        {student.practice_manager || "-"}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                         {student.practice_education_center || "-"}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[120px] text-center">
                         {student.practice_institution || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[140px] text-center">
-                        {student.service_payment_status || "-"}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
-                        {student.consultation_content || "-"}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
-                        {student.special_notes || "-"}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
-                        {formatDate(student.created_at)}
                       </td>
                     </tr>
                   ))}
@@ -1766,6 +1858,88 @@ export default function StudentsPage() {
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
                   삭제
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 상담내용 입력 모달 */}
+      {showConsultationModal && consultingStudent && (
+        <div className="fixed inset-0 bg-[#00000080] overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  상담내용 입력 - {consultingStudent.student_name}
+                </h3>
+                <button
+                  onClick={handleConsultationCancel}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="mb-4">
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                  <div>
+                    <span className="font-medium">학생명:</span>{" "}
+                    {consultingStudent.student_name}
+                  </div>
+                  <div>
+                    <span className="font-medium">연락처:</span>{" "}
+                    {consultingStudent.phone}
+                  </div>
+                  <div>
+                    <span className="font-medium">실습종류:</span>{" "}
+                    {consultingStudent.practice_type}
+                  </div>
+                  <div>
+                    <span className="font-medium">희망학기:</span>{" "}
+                    {consultingStudent.preferred_semester}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  상담내용
+                </label>
+                <textarea
+                  value={consultationContent}
+                  onChange={(e) => setConsultationContent(e.target.value)}
+                  rows={8}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="상담 내용을 입력해주세요..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={handleConsultationCancel}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleConsultationSave}
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  저장
                 </button>
               </div>
             </div>

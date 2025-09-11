@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-
 import { usePathname } from "next/navigation";
+import { AdminAuth } from "@/lib/admin-auth";
 
 const navigation = [
   {
@@ -17,15 +17,46 @@ const navigation = [
     description: "실습기관 및 교육원 관리",
   },
   {
-    name: "상담 관리",
+    name: "협약교육원 관리",
+    href: "/admin/contract-education-centers",
+    description: "협약교육원 정보 및 결제 관리",
+  },
+  {
+    name: "메모 관리",
     href: "/admin/consultations",
-    description: "상담 기록 및 관리",
+    description: "메모 기록 및 관리",
+  },
+  {
+    name: "로그 관리",
+    href: "/admin/logs",
+    description: "상위 관리자 전용 페이지",
   },
 ];
 
 export default function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      try {
+        const currentUser = await AdminAuth.getCurrentUser();
+        if (currentUser) {
+          // 최상위관리자인지 확인 (position_name이 "최고관리자"인 경우)
+          setIsSuperAdmin(currentUser.position_name === "최고관리자");
+        }
+      } catch (error) {
+        console.error("사용자 권한 확인 실패:", error);
+        setIsSuperAdmin(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUserRole();
+  }, []);
 
   return (
     <div
@@ -46,18 +77,15 @@ export default function AdminSidebar() {
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
           <div className="flex items-center">
             <div
-              className="w-5 h-5
-             rounded-lg flex items-center justify-center"
+              className="
+              flex items-center justify-center"
             >
               <img
                 src="/logo.png"
                 alt="한평생실습지원센터 로고"
-                className="rounded-lg"
+                className="w-[100%] h-[1.5rem]"
               />
             </div>
-            <span className="ml-2 text-xl font-semibold text-gray-900">
-              한평생실습지원
-            </span>
           </div>
           <button
             onClick={() => setIsCollapsed(true)}
@@ -82,6 +110,11 @@ export default function AdminSidebar() {
         {/* 네비게이션 메뉴 */}
         <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto">
           {navigation.map((item) => {
+            // 로그관리는 최상위관리자만 볼 수 있음
+            if (item.name === "로그 관리" && !isSuperAdmin) {
+              return null;
+            }
+
             const isActive = pathname === item.href;
             return (
               <Link
