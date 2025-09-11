@@ -6,17 +6,17 @@ import { AdminAuth } from "@/lib/admin-auth";
 import { supabase } from "@/lib/supabase-client";
 
 // Assume these are defined elsewhere and imported
-const CONSULTATION_TYPES = ["일반상담", "기타"]; // Example types
+const MEMO_TYPES = ["일반메모", "중요메모", "기타"]; // Example types
 const ITEMS_PER_PAGE = 10; // Example items per page
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("consultations");
-  const [consultations, setConsultations] = useState([]);
-  const [selectedConsultation, setSelectedConsultation] = useState(null);
-  const [selectedConsultations, setSelectedConsultations] = useState(new Set());
+  const [consultations, setMemos] = useState([]);
+  const [selectedMemo, setSelectedMemo] = useState(null);
+  const [selectedMemos, setSelectedMemos] = useState(new Set());
   const [filters, setFilters] = useState({
     contentSearch: "",
-    consultationType: "",
+    memoType: "",
     startDate: "",
     endDate: "",
   });
@@ -24,22 +24,22 @@ function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newConsultation, setNewConsultation] = useState({
-    consultation_type: "",
-    consultant_name: "",
-    member_name: "",
-    consultation_content: "",
+  const [newMemo, setNewMemo] = useState({
+    memo_type: "",
+    writer_name: "",
+    related_person: "",
+    memo_content: "",
   });
   const [attachedFile, setAttachedFile] = useState(null);
-  const [editingConsultation, setEditingConsultation] = useState(null);
+  const [editingMemo, setEditingMemo] = useState(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(true); // Placeholder
   const [canDelete, setCanDelete] = useState(true); // Placeholder
   const [stats, setStats] = useState({ total: 0 }); // Placeholder for total consultations
-  const [processingStatus, setProcessingStatus] = useState({}); // 상담별 처리 상태 관리
+  const [processingStatus, setProcessingStatus] = useState({}); // 메모별 처리 상태 관리
 
   // --- Mock Data and Functions (Replace with actual API calls) ---
 
-  const fetchConsultations = useCallback(async () => {
+  const fetchMemos = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
@@ -50,11 +50,11 @@ function AdminDashboard() {
       // 필터 적용
       if (filters.contentSearch) {
         query = query.or(
-          `consultation_content.ilike.%${filters.contentSearch}%,member_name.ilike.%${filters.contentSearch}%,consultant_name.ilike.%${filters.contentSearch}%`
+          `memo_content.ilike.%${filters.contentSearch}%,related_person.ilike.%${filters.contentSearch}%,writer_name.ilike.%${filters.contentSearch}%`
         );
       }
-      if (filters.consultationType) {
-        query = query.eq("consultation_type", filters.consultationType);
+      if (filters.memoType) {
+        query = query.eq("memo_type", filters.memoType);
       }
       if (filters.startDate) {
         query = query.gte("created_at", filters.startDate);
@@ -67,11 +67,11 @@ function AdminDashboard() {
 
       if (error) throw error;
 
-      setConsultations(data || []);
+      setMemos(data || []);
       setStats({ total: data?.length || 0 });
     } catch (error) {
-      console.error("상담 데이터 조회 실패:", error);
-      setConsultations([]);
+      console.error("메모 데이터 조회 실패:", error);
+      setMemos([]);
       setStats({ total: 0 });
     } finally {
       setIsLoading(false);
@@ -79,17 +79,17 @@ function AdminDashboard() {
   }, [filters]);
 
   useEffect(() => {
-    fetchConsultations();
-  }, [fetchConsultations]);
+    fetchMemos();
+  }, [fetchMemos]);
 
-  const handleAddConsultation = async () => {
+  const handleAddMemo = async () => {
     try {
       // 필수 필드 검증
       if (
-        !newConsultation.consultation_type ||
-        !newConsultation.consultant_name ||
-        !newConsultation.member_name ||
-        !newConsultation.consultation_content
+        !newMemo.memo_type ||
+        !newMemo.writer_name ||
+        !newMemo.related_person ||
+        !newMemo.memo_content
       ) {
         alert("모든 필수 필드를 입력해주세요.");
         return;
@@ -102,16 +102,16 @@ function AdminDashboard() {
         return;
       }
 
-      // Supabase에 상담 데이터 저장
+      // Supabase에 메모 데이터 저장
       const { data, error } = await supabase
         .from("consultations")
         .insert([
           {
-            consultation_type: newConsultation.consultation_type,
-            consultant_name: newConsultation.consultant_name,
-            member_name: newConsultation.member_name,
-            consultation_content: newConsultation.consultation_content,
-            consultation_date: new Date().toISOString(),
+            memo_type: newMemo.memo_type,
+            writer_name: newMemo.writer_name,
+            related_person: newMemo.related_person,
+            memo_content: newMemo.memo_content,
+            memo_date: new Date().toISOString(),
             attached_file_name: attachedFile ? attachedFile.name : null,
             attached_file_url: attachedFile
               ? URL.createObjectURL(attachedFile)
@@ -128,12 +128,12 @@ function AdminDashboard() {
       if (error) throw error;
 
       // 등록된 데이터 확인
-      console.log("상담 등록 성공 - 등록된 데이터:", data);
-      console.log("상담 등록 - is_processed 값:", data.is_processed);
+      console.log("메모 등록 성공 - 등록된 데이터:", data);
+      console.log("메모 등록 - is_processed 값:", data.is_processed);
 
       // 로그 기록
-      console.log("상담 등록 - 로그 기록 시작");
-      console.log("상담 등록 - currentUser:", currentUser);
+      console.log("메모 등록 - 로그 기록 시작");
+      console.log("메모 등록 - currentUser:", currentUser);
 
       if (currentUser) {
         try {
@@ -145,65 +145,65 @@ function AdminDashboard() {
             "consultations",
             data.id,
             null,
-            newConsultation,
-            `상담 등록: ${newConsultation.member_name}`,
+            newMemo,
+            `메모 등록: ${newMemo.related_person}`,
             undefined,
             navigator.userAgent
           );
-          console.log("상담 등록 - 로그 기록 완료");
+          console.log("메모 등록 - 로그 기록 완료");
         } catch (logError) {
-          console.error("상담 등록 - 로그 기록 실패:", logError);
+          console.error("메모 등록 - 로그 기록 실패:", logError);
         }
       } else {
-        console.log("상담 등록 - currentUser가 null입니다");
+        console.log("메모 등록 - currentUser가 null입니다");
       }
 
-      setNewConsultation({
-        consultation_type: "",
-        consultant_name: "",
-        member_name: "",
-        consultation_content: "",
+      setNewMemo({
+        memo_type: "",
+        writer_name: "",
+        related_person: "",
+        memo_content: "",
       });
       setAttachedFile(null);
       setShowAddForm(false);
 
       // 데이터 새로고침
-      await fetchConsultations();
-      alert("상담이 성공적으로 등록되었습니다.");
+      await fetchMemos();
+      alert("메모가 성공적으로 등록되었습니다.");
     } catch (error) {
-      console.error("상담 등록 실패:", error);
-      alert("상담 등록 중 오류가 발생했습니다: " + (error.message || error));
+      console.error("메모 등록 실패:", error);
+      alert("메모 등록 중 오류가 발생했습니다: " + (error.message || error));
     }
   };
 
-  const handleEditConsultation = async () => {
-    if (!editingConsultation) return;
+  const handleEditMemo = async () => {
+    if (!editingMemo) return;
     try {
       // 기존 데이터 저장 (로그용)
       const originalConsultation = consultations.find(
-        (c) => c.id === editingConsultation.id
+        (c) => c.id === editingMemo.id
       );
 
       // Supabase에서 상담 데이터 업데이트
       const { error } = await supabase
         .from("consultations")
         .update({
-          consultation_type: editingConsultation.consultation_type,
-          consultant_name: editingConsultation.consultant_name,
-          member_name: editingConsultation.member_name,
-          consultation_content: editingConsultation.consultation_content,
+          memo_type: editingMemo.memo_type,
+          writer_name: editingMemo.writer_name,
+          related_person: editingMemo.related_person,
+          memo_content: editingMemo.memo_content,
           attached_file_name: attachedFile
             ? attachedFile.name
-            : editingConsultation.attached_file_name,
+            : editingMemo.attached_file_name,
           attached_file_url: attachedFile
             ? URL.createObjectURL(attachedFile)
-            : editingConsultation.attached_file_url,
+            : editingMemo.attached_file_url,
           attached_file_size: attachedFile
             ? attachedFile.size
-            : editingConsultation.attached_file_size,
+            : editingMemo.attached_file_size,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", editingConsultation.id);
+        .eq("id", editingMemo.id);
 
       if (error) throw error;
 
@@ -216,49 +216,45 @@ function AdminDashboard() {
           currentUser.position_name || "알 수 없음",
           "UPDATE",
           "consultations",
-          editingConsultation.id.toString(),
+          editingMemo.id.toString(),
           originalConsultation,
-          editingConsultation,
-          `상담 수정: ${editingConsultation.member_name}`,
+          editingMemo,
+          `메모 수정: ${editingMemo.related_person}`,
           undefined,
           navigator.userAgent
         );
       }
 
-      setEditingConsultation(null);
+      setEditingMemo(null);
       setAttachedFile(null);
 
       // 데이터 새로고침
-      await fetchConsultations();
-      alert("상담이 성공적으로 수정되었습니다.");
+      await fetchMemos();
+      alert("메모가 성공적으로 수정되었습니다.");
     } catch (error) {
-      console.error("상담 수정 실패:", error);
-      alert("상담 수정 중 오류가 발생했습니다: " + (error.message || error));
+      console.error("메모 수정 실패:", error);
+      alert("메모 수정 중 오류가 발생했습니다: " + (error.message || error));
     }
   };
 
   const handleBulkDelete = async () => {
-    if (selectedConsultations.size === 0) return;
+    if (selectedMemos.size === 0) return;
 
-    if (
-      !confirm(
-        `선택한 ${selectedConsultations.size}개의 상담을 삭제하시겠습니까?`
-      )
-    ) {
+    if (!confirm(`선택한 ${selectedMemos.size}개의 메모를 삭제하시겠습니까?`)) {
       return;
     }
 
     try {
-      // 삭제될 상담들 저장 (로그용)
+      // 삭제될 메모들 저장 (로그용)
       const deletedConsultations = consultations.filter((c) =>
-        selectedConsultations.has(c.id)
+        selectedMemos.has(c.id)
       );
 
-      // Supabase에서 상담 데이터 삭제
+      // Supabase에서 메모 데이터 삭제
       const { error } = await supabase
         .from("consultations")
         .delete()
-        .in("id", Array.from(selectedConsultations));
+        .in("id", Array.from(selectedMemos));
 
       if (error) throw error;
 
@@ -275,23 +271,23 @@ function AdminDashboard() {
             consultation.id.toString(),
             consultation,
             null,
-            `상담 삭제: ${consultation.member_name}`,
+            `메모 삭제: ${consultation.related_person}`,
             undefined,
             navigator.userAgent
           );
         }
       }
 
-      setSelectedConsultations(new Set());
+      setSelectedMemos(new Set());
 
       // 데이터 새로고침
-      await fetchConsultations();
+      await fetchMemos();
       alert(
-        `${deletedConsultations.length}개의 상담이 성공적으로 삭제되었습니다.`
+        `${deletedConsultations.length}개의 메모가 성공적으로 삭제되었습니다.`
       );
     } catch (error) {
-      console.error("상담 삭제 실패:", error);
-      alert("상담 삭제 중 오류가 발생했습니다: " + (error.message || error));
+      console.error("메모 삭제 실패:", error);
+      alert("메모 삭제 중 오류가 발생했습니다: " + (error.message || error));
     }
   };
 
@@ -322,14 +318,14 @@ function AdminDashboard() {
             is_processed: true,
             processed_at: new Date().toISOString(),
           },
-          `상담 처리완료: ${consultation?.member_name || consultationId}`,
+          `상담 처리완료: ${consultation?.related_person || consultationId}`,
           undefined,
           navigator.userAgent
         );
       }
 
       // 데이터 새로고침
-      await fetchConsultations();
+      await fetchMemos();
       alert("상담이 처리완료로 변경되었습니다.");
     } catch (error) {
       console.error("상담 처리완료 실패:", error);
@@ -377,7 +373,7 @@ function AdminDashboard() {
             consultationId.toString(),
             consultation,
             { ...consultation, is_processed: false, processed_at: null },
-            `상담 처리취소: ${consultation?.member_name || consultationId}`,
+            `상담 처리취소: ${consultation?.related_person || consultationId}`,
             undefined,
             navigator.userAgent
           );
@@ -389,7 +385,7 @@ function AdminDashboard() {
 
       // 데이터 새로고침
       console.log("처리취소 - 데이터 새로고침 시작");
-      await fetchConsultations();
+      await fetchMemos();
       console.log("처리취소 - 데이터 새로고침 완료");
 
       alert("상담이 처리취소로 변경되었습니다.");
@@ -409,11 +405,11 @@ function AdminDashboard() {
 
   // 일괄 처리완료 핸들러
   const handleBulkMarkAsProcessed = async () => {
-    if (selectedConsultations.size === 0) return;
+    if (selectedMemos.size === 0) return;
 
     if (
       !confirm(
-        `선택한 ${selectedConsultations.size}개의 상담을 처리완료로 변경하시겠습니까?`
+        `선택한 ${selectedMemos.size}개의 상담을 처리완료로 변경하시겠습니까?`
       )
     ) {
       return;
@@ -427,7 +423,7 @@ function AdminDashboard() {
       }
 
       // 각 상담을 처리완료로 변경
-      for (const consultationId of selectedConsultations) {
+      for (const consultationId of selectedMemos) {
         const { error } = await supabase
           .from("consultations")
           .update({
@@ -453,17 +449,17 @@ function AdminDashboard() {
             is_processed: true,
             processed_at: new Date().toISOString(),
           },
-          `상담 일괄 처리완료: ${consultation?.member_name || consultationId}`,
+          `상담 일괄 처리완료: ${
+            consultation?.related_person || consultationId
+          }`,
           undefined,
           navigator.userAgent
         );
       }
 
-      setSelectedConsultations(new Set());
-      await fetchConsultations();
-      alert(
-        `${selectedConsultations.size}개의 상담이 처리완료로 변경되었습니다.`
-      );
+      setSelectedMemos(new Set());
+      await fetchMemos();
+      alert(`${selectedMemos.size}개의 상담이 처리완료로 변경되었습니다.`);
     } catch (error) {
       console.error("상담 일괄 처리완료 실패:", error);
       alert(
@@ -474,16 +470,13 @@ function AdminDashboard() {
 
   // 일괄 처리취소 핸들러
   const handleBulkMarkAsUnprocessed = async () => {
-    console.log(
-      "일괄 처리취소 시작 - 선택된 상담 수:",
-      selectedConsultations.size
-    );
+    console.log("일괄 처리취소 시작 - 선택된 상담 수:", selectedMemos.size);
 
-    if (selectedConsultations.size === 0) return;
+    if (selectedMemos.size === 0) return;
 
     if (
       !confirm(
-        `선택한 ${selectedConsultations.size}개의 상담을 처리취소로 변경하시겠습니까?`
+        `선택한 ${selectedMemos.size}개의 상담을 처리취소로 변경하시겠습니까?`
       )
     ) {
       return;
@@ -499,7 +492,7 @@ function AdminDashboard() {
         return;
       }
 
-      const selectedIds = Array.from(selectedConsultations);
+      const selectedIds = Array.from(selectedMemos);
       console.log("일괄 처리취소 - 선택된 ID들:", selectedIds);
 
       // 각 상담을 처리취소로 변경
@@ -546,7 +539,7 @@ function AdminDashboard() {
               processed_at: null,
             },
             `상담 일괄 처리취소: ${
-              consultation?.member_name || consultationId
+              consultation?.related_person || consultationId
             }`,
             undefined,
             navigator.userAgent
@@ -562,10 +555,10 @@ function AdminDashboard() {
       }
 
       console.log("일괄 처리취소 - 모든 상담 처리 완료, 선택 초기화");
-      setSelectedConsultations(new Set());
+      setSelectedMemos(new Set());
 
       console.log("일괄 처리취소 - 데이터 새로고침 시작");
-      await fetchConsultations();
+      await fetchMemos();
 
       alert(`${selectedIds.length}개의 상담이 처리취소로 변경되었습니다.`);
       console.log("일괄 처리취소 - 완료");
@@ -620,7 +613,7 @@ function AdminDashboard() {
   const resetFilters = () => {
     setFilters({
       contentSearch: "",
-      consultationType: "",
+      memoType: "",
       startDate: "",
       endDate: "",
     });
@@ -628,7 +621,7 @@ function AdminDashboard() {
   };
 
   const handleSelectConsultation = (id) => {
-    setSelectedConsultations((prev) => {
+    setSelectedMemos((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -644,10 +637,10 @@ function AdminDashboard() {
     if (currentConsultationsOnPage.length === 0) return;
 
     const allSelected = currentConsultationsOnPage.every((consultation) =>
-      selectedConsultations.has(consultation.id)
+      selectedMemos.has(consultation.id)
     );
 
-    setSelectedConsultations((prev) => {
+    setSelectedMemos((prev) => {
       const newSet = new Set(prev);
       if (allSelected) {
         currentConsultationsOnPage.forEach((consultation) =>
@@ -703,13 +696,13 @@ function AdminDashboard() {
             <>
               <div className="flex items-center justify-between mb-4">
                 <h1 className="text-xl font-semibold text-gray-900">
-                  상담 관리
+                  메모 관리
                 </h1>
                 <div className="flex items-center space-x-2">
-                  {selectedConsultations.size > 0 && (
+                  {selectedMemos.size > 0 && (
                     <div className="flex items-center space-x-2">
                       <span className="text-sm text-gray-600">
-                        {selectedConsultations.size}개 선택됨
+                        {selectedMemos.size}개 선택됨
                       </span>
                       <button
                         onClick={handleBulkMarkAsProcessed}
@@ -733,15 +726,15 @@ function AdminDashboard() {
                       )}
                     </div>
                   )}
-                  {selectedConsultations.size === 1 && (
+                  {selectedMemos.size === 1 && (
                     <button
                       onClick={() => {
-                        const selectedId = Array.from(selectedConsultations)[0];
+                        const selectedId = Array.from(selectedMemos)[0];
                         const consultation = consultations.find(
                           (c) => c.id === selectedId
                         );
                         if (consultation) {
-                          setEditingConsultation(consultation);
+                          setEditingMemo(consultation);
                         }
                       }}
                       className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
@@ -753,7 +746,7 @@ function AdminDashboard() {
                     onClick={() => setShowAddForm(true)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    상담 등록
+                    메모 등록
                   </button>
                 </div>
               </div>
@@ -765,7 +758,7 @@ function AdminDashboard() {
                     <div className="relative">
                       <input
                         type="text"
-                        placeholder="상담 검색 (상담자, 상담내용, 회원명 등)..."
+                        placeholder="메모 검색 (작성자, 메모내용, 관련인물 등)..."
                         value={filters.contentSearch}
                         onChange={(e) =>
                           updateFilter("contentSearch", e.target.value)
@@ -826,20 +819,20 @@ function AdminDashboard() {
                 {isFilterExpanded && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {/* 상담종류 필터 */}
+                      {/* 메모종류 필터 */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          상담종류
+                          메모종류
                         </label>
                         <select
-                          value={filters.consultationType}
+                          value={filters.memoType}
                           onChange={(e) =>
-                            updateFilter("consultationType", e.target.value)
+                            updateFilter("memoType", e.target.value)
                           }
                           className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="">전체 종류</option>
-                          {CONSULTATION_TYPES.map((type) => (
+                          {MEMO_TYPES.map((type) => (
                             <option key={type} value={type}>
                               {type}
                             </option>
@@ -903,7 +896,7 @@ function AdminDashboard() {
                             type="checkbox"
                             checked={getCurrentPageConsultations().every(
                               (consultation) =>
-                                selectedConsultations.has(consultation.id)
+                                selectedMemos.has(consultation.id)
                             )}
                             onChange={handleSelectAll}
                             className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -920,11 +913,11 @@ function AdminDashboard() {
                         <div
                           key={consultation.id}
                           className={`p-4 hover:bg-gray-50 transition-colors ${
-                            selectedConsultation?.id === consultation.id
+                            selectedMemo?.id === consultation.id
                               ? "bg-blue-50 border-r-2 border-blue-500"
                               : ""
                           } ${
-                            selectedConsultations.has(consultation.id)
+                            selectedMemos.has(consultation.id)
                               ? "bg-yellow-50"
                               : ""
                           }`}
@@ -933,9 +926,7 @@ function AdminDashboard() {
                             <div className="flex items-center flex-1">
                               <input
                                 type="checkbox"
-                                checked={selectedConsultations.has(
-                                  consultation.id
-                                )}
+                                checked={selectedMemos.has(consultation.id)}
                                 onChange={() =>
                                   handleSelectConsultation(consultation.id)
                                 }
@@ -944,9 +935,7 @@ function AdminDashboard() {
                               />
                               <div
                                 className="flex-1 cursor-pointer"
-                                onClick={() =>
-                                  setSelectedConsultation(consultation)
-                                }
+                                onClick={() => setSelectedMemo(consultation)}
                               >
                                 <div className="flex items-center space-x-2 mb-1">
                                   <span
@@ -963,7 +952,7 @@ function AdminDashboard() {
                                     )}
                                   </span>
                                   <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                                    {consultation.consultation_type}
+                                    {consultation.memo_type}
                                   </span>
                                   {consultation.is_processed === true ||
                                   consultation.is_processed === "true" ? (
@@ -977,7 +966,7 @@ function AdminDashboard() {
                                   )}
                                 </div>
                                 <div className="text-sm text-gray-600 mb-1">
-                                  {consultation.member_name}
+                                  {consultation.related_person}
                                 </div>
                                 <div className="text-xs text-gray-500">
                                   {new Date(
@@ -1055,7 +1044,7 @@ function AdminDashboard() {
         <div className="w-1/2 bg-white flex flex-col overflow-hidden">
           {" "}
           {/* Added flex-col and overflow-hidden */}
-          {selectedConsultation ? (
+          {selectedMemo ? (
             <div className="h-full flex flex-col">
               {" "}
               {/* Ensure it takes full height */}
@@ -1064,10 +1053,10 @@ function AdminDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <h2 className="text-lg font-semibold text-gray-900">
-                      상담 상세
+                      메모 상세
                     </h2>
-                    {selectedConsultation.is_processed === true ||
-                    selectedConsultation.is_processed === "true" ? (
+                    {selectedMemo.is_processed === true ||
+                    selectedMemo.is_processed === "true" ? (
                       <span className="px-3 py-1 text-sm bg-red-100 text-red-600 rounded-full">
                         처리완료
                       </span>
@@ -1090,10 +1079,10 @@ function AdminDashboard() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        * 상담자
+                        * 작성자
                       </label>
                       <div className="text-sm text-gray-900">
-                        {selectedConsultation.consultant_name}
+                        {selectedMemo.writer_name}
                       </div>
                     </div>
 
@@ -1103,7 +1092,7 @@ function AdminDashboard() {
                       </label>
                       <div className="text-sm text-gray-900">
                         {new Date(
-                          selectedConsultation.consultation_date
+                          selectedMemo.consultation_date
                         ).toLocaleString("ko-KR")}
                       </div>
                     </div>
@@ -1113,19 +1102,17 @@ function AdminDashboard() {
                         * 회원정보
                       </label>
                       <div className="text-sm text-gray-900">
-                        {selectedConsultation.member_name || "-"}
+                        {selectedMemo.related_person || "-"}
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        * 상담내용
+                        * 메모내용
                       </label>
                       <div className="text-sm text-gray-900 bg-gray-50 p-3 rounded-md">
                         <ul className="list-disc list-inside space-y-1">
-                          {formatConsultationContent(
-                            selectedConsultation.consultation_content
-                          )}
+                          {formatConsultationContent(selectedMemo.memo_content)}
                         </ul>
                       </div>
                     </div>
@@ -1134,7 +1121,7 @@ function AdminDashboard() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         * 첨부파일
                       </label>
-                      {selectedConsultation.attached_file_name ? (
+                      {selectedMemo.attached_file_name ? (
                         <div className="flex items-center space-x-2">
                           <svg
                             className="w-4 h-4 text-gray-400"
@@ -1150,17 +1137,17 @@ function AdminDashboard() {
                             />
                           </svg>
                           <a
-                            href={selectedConsultation.attached_file_url}
+                            href={selectedMemo.attached_file_url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-blue-600 hover:text-blue-800"
                           >
-                            {selectedConsultation.attached_file_name}
+                            {selectedMemo.attached_file_name}
                           </a>
                           <span className="text-xs text-gray-500">
                             (
                             {formatFileSize(
-                              selectedConsultation.attached_file_size || 0
+                              selectedMemo.attached_file_size || 0
                             )}
                             )
                           </span>
@@ -1187,25 +1174,25 @@ function AdminDashboard() {
       {showAddForm && (
         <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">새 상담 등록</h2>
+            <h2 className="text-lg font-semibold mb-4">새 메모 등록</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담종류 *
+                  메모종류 *
                 </label>
                 <select
-                  value={newConsultation.consultation_type}
+                  value={newMemo.memo_type}
                   onChange={(e) =>
-                    setNewConsultation({
-                      ...newConsultation,
-                      consultation_type: e.target.value,
+                    setNewMemo({
+                      ...newMemo,
+                      memo_type: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">상담 종류 선택</option>{" "}
                   {/* Added default option */}
-                  {CONSULTATION_TYPES.map((type) => (
+                  {MEMO_TYPES.map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -1214,15 +1201,15 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담자 *
+                  작성자 *
                 </label>
                 <input
                   type="text"
-                  value={newConsultation.consultant_name}
+                  value={newMemo.writer_name}
                   onChange={(e) =>
-                    setNewConsultation({
-                      ...newConsultation,
-                      consultant_name: e.target.value,
+                    setNewMemo({
+                      ...newMemo,
+                      writer_name: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1230,15 +1217,15 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  회원명
+                  관련인물
                 </label>
                 <input
                   type="text"
-                  value={newConsultation.member_name}
+                  value={newMemo.related_person}
                   onChange={(e) =>
-                    setNewConsultation({
-                      ...newConsultation,
-                      member_name: e.target.value,
+                    setNewMemo({
+                      ...newMemo,
+                      related_person: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1246,14 +1233,14 @@ function AdminDashboard() {
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담내용 *
+                  메모내용 *
                 </label>
                 <textarea
-                  value={newConsultation.consultation_content}
+                  value={newMemo.memo_content}
                   onChange={(e) =>
-                    setNewConsultation({
-                      ...newConsultation,
-                      consultation_content: e.target.value,
+                    setNewMemo({
+                      ...newMemo,
+                      memo_content: e.target.value,
                     })
                   }
                   rows={6}
@@ -1286,7 +1273,7 @@ function AdminDashboard() {
                 취소
               </button>
               <button
-                onClick={handleAddConsultation}
+                onClick={handleAddMemo}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 저장
@@ -1296,29 +1283,29 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* 상담 수정 모달 */}
-      {editingConsultation && (
+      {/* 메모 수정 모달 */}
+      {editingMemo && (
         <div className="fixed inset-0 bg-[#00000080] flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-4">상담 수정</h2>
+            <h2 className="text-lg font-semibold mb-4">메모 수정</h2>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담종류 *
+                  메모종류 *
                 </label>
                 <select
-                  value={editingConsultation.consultation_type}
+                  value={editingMemo.memo_type}
                   onChange={(e) =>
-                    setEditingConsultation({
-                      ...editingConsultation,
-                      consultation_type: e.target.value,
+                    setEditingMemo({
+                      ...editingMemo,
+                      memo_type: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">상담 종류 선택</option>{" "}
                   {/* Added default option */}
-                  {CONSULTATION_TYPES.map((type) => (
+                  {MEMO_TYPES.map((type) => (
                     <option key={type} value={type}>
                       {type}
                     </option>
@@ -1327,15 +1314,15 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담자 *
+                  작성자 *
                 </label>
                 <input
                   type="text"
-                  value={editingConsultation.consultant_name}
+                  value={editingMemo.writer_name}
                   onChange={(e) =>
-                    setEditingConsultation({
-                      ...editingConsultation,
-                      consultant_name: e.target.value,
+                    setEditingMemo({
+                      ...editingMemo,
+                      writer_name: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1343,15 +1330,15 @@ function AdminDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  회원명
+                  관련인물
                 </label>
                 <input
                   type="text"
-                  value={editingConsultation.member_name || ""}
+                  value={editingMemo.related_person || ""}
                   onChange={(e) =>
-                    setEditingConsultation({
-                      ...editingConsultation,
-                      member_name: e.target.value,
+                    setEditingMemo({
+                      ...editingMemo,
+                      related_person: e.target.value,
                     })
                   }
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -1359,16 +1346,14 @@ function AdminDashboard() {
               </div>
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  상담내용 *
+                  메모내용 *
                 </label>
                 <textarea
-                  value={formatContentForEdit(
-                    editingConsultation.consultation_content
-                  )}
+                  value={formatContentForEdit(editingMemo.memo_content)}
                   onChange={(e) =>
-                    setEditingConsultation({
-                      ...editingConsultation,
-                      consultation_content: e.target.value,
+                    setEditingMemo({
+                      ...editingMemo,
+                      memo_content: e.target.value,
                     })
                   }
                   rows={6}
@@ -1379,13 +1364,10 @@ function AdminDashboard() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   첨부파일
                 </label>
-                {editingConsultation.attached_file_name && (
+                {editingMemo.attached_file_name && (
                   <div className="mb-2 text-sm text-gray-600">
-                    현재 파일: {editingConsultation.attached_file_name} (
-                    {formatFileSize(
-                      editingConsultation.attached_file_size || 0
-                    )}
-                    )
+                    현재 파일: {editingMemo.attached_file_name} (
+                    {formatFileSize(editingMemo.attached_file_size || 0)})
                   </div>
                 )}
                 <input
@@ -1403,13 +1385,13 @@ function AdminDashboard() {
             </div>
             <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={() => setEditingConsultation(null)}
+                onClick={() => setEditingMemo(null)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
                 취소
               </button>
               <button
-                onClick={handleEditConsultation}
+                onClick={handleEditMemo}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 저장

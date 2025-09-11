@@ -230,6 +230,9 @@ export default function InstitutionsPage() {
         )
       );
 
+      // 현재 사용자 정보 가져오기
+      const currentUser = await AdminAuth.getCurrentUser();
+
       if (editingEducation) {
         const { data, error } = await (supabase as any)
           .from("education_centers")
@@ -239,13 +242,49 @@ export default function InstitutionsPage() {
           console.error("Update error:", error);
           throw error;
         }
+
+        // 로그 기록 (수정)
+        if (currentUser) {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "education_centers",
+            editingEducation.id,
+            editingEducation,
+            cleanFormData,
+            `실습교육원 수정: ${cleanFormData.center_name}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
       } else {
         const { data, error } = await (supabase as any)
           .from("education_centers")
-          .insert([cleanFormData]);
+          .insert([cleanFormData])
+          .select()
+          .single();
         if (error) {
           console.error("Insert error:", error);
           throw error;
+        }
+
+        // 로그 기록 (생성)
+        if (currentUser && data) {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "CREATE",
+            "education_centers",
+            data.id,
+            null,
+            cleanFormData,
+            `실습교육원 등록: ${cleanFormData.center_name}`,
+            undefined,
+            navigator.userAgent
+          );
         }
       }
 
@@ -271,12 +310,37 @@ export default function InstitutionsPage() {
     try {
       setLoading(true); // 로딩 상태 시작
 
+      // 삭제될 교육원들 저장 (로그용)
+      const deletedEducations = educationCenters.filter((edu) =>
+        ids.includes(edu.id)
+      );
+
       const { error } = await supabase
         .from("education_centers")
         .delete()
         .in("id", ids);
 
       if (error) throw error;
+
+      // 로그 기록
+      const logUser = await AdminAuth.getCurrentUser();
+      if (logUser) {
+        for (const education of deletedEducations) {
+          await AdminLogger.logActivity(
+            logUser.id,
+            logUser.name || "알 수 없음",
+            logUser.position_name || "알 수 없음",
+            "DELETE",
+            "education_centers",
+            education.id,
+            education,
+            null,
+            `실습교육원 삭제: ${education.center_name}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
+      }
 
       // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
       setEducationCenters((prev) =>
@@ -286,13 +350,21 @@ export default function InstitutionsPage() {
       setError(null);
 
       // 활동 로그 기록
-      for (const educationId of ids) {
-        await AdminLogger.logDelete(
-          "education_centers",
-          educationId,
-          {},
-          `실습교육원 삭제 (${ids.length}개 일괄 삭제)`
-        );
+      const adminUser = await AdminAuth.getCurrentUser();
+      if (adminUser) {
+        for (const educationId of ids) {
+          await AdminLogger.logActivity(
+            adminUser.id,
+            adminUser.name,
+            adminUser.position_name,
+            "DELETE",
+            "education_centers",
+            educationId,
+            {},
+            {},
+            `실습교육원 삭제 (${ids.length}개 일괄 삭제)`
+          );
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
@@ -390,17 +462,56 @@ export default function InstitutionsPage() {
         cleanFormData.cost = parseCurrency(cleanFormData.cost as string);
       }
 
+      // 현재 사용자 정보 가져오기
+      const currentUser = await AdminAuth.getCurrentUser();
+
       if (editingInstitution) {
         const { error } = await (supabase as any)
           .from("practice_institutions")
           .update(cleanFormData)
           .eq("id", editingInstitution.id);
         if (error) throw error;
+
+        // 로그 기록 (수정)
+        if (currentUser) {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "practice_institutions",
+            editingInstitution.id,
+            editingInstitution,
+            cleanFormData,
+            `실습기관 수정: ${cleanFormData.institution_name}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
       } else {
-        const { error } = await (supabase as any)
+        const { data, error } = await (supabase as any)
           .from("practice_institutions")
-          .insert([cleanFormData]);
+          .insert([cleanFormData])
+          .select()
+          .single();
         if (error) throw error;
+
+        // 로그 기록 (생성)
+        if (currentUser && data) {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "CREATE",
+            "practice_institutions",
+            data.id,
+            null,
+            cleanFormData,
+            `실습기관 등록: ${cleanFormData.institution_name}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
       }
 
       await fetchPracticeInstitutions();
@@ -425,12 +536,37 @@ export default function InstitutionsPage() {
     try {
       setLoading(true); // 로딩 상태 시작
 
+      // 삭제될 기관들 저장 (로그용)
+      const deletedInstitutions = practiceInstitutions.filter((inst) =>
+        ids.includes(inst.id)
+      );
+
       const { error } = await supabase
         .from("practice_institutions")
         .delete()
         .in("id", ids);
 
       if (error) throw error;
+
+      // 로그 기록
+      const logUser = await AdminAuth.getCurrentUser();
+      if (logUser) {
+        for (const institution of deletedInstitutions) {
+          await AdminLogger.logActivity(
+            logUser.id,
+            logUser.name || "알 수 없음",
+            logUser.position_name || "알 수 없음",
+            "DELETE",
+            "practice_institutions",
+            institution.id,
+            institution,
+            null,
+            `실습기관 삭제: ${institution.institution_name}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
+      }
 
       // 로컬 상태에서 즉시 제거하여 UI 반응성 개선
       setPracticeInstitutions((prev) =>
@@ -440,13 +576,21 @@ export default function InstitutionsPage() {
       setError(null);
 
       // 활동 로그 기록
-      for (const institutionId of ids) {
-        await AdminLogger.logDelete(
-          "practice_institutions",
-          institutionId,
-          {},
-          `실습기관 삭제 (${ids.length}개 일괄 삭제)`
-        );
+      const adminUser = await AdminAuth.getCurrentUser();
+      if (adminUser) {
+        for (const institutionId of ids) {
+          await AdminLogger.logActivity(
+            adminUser.id,
+            adminUser.name,
+            adminUser.position_name,
+            "DELETE",
+            "practice_institutions",
+            institutionId,
+            {},
+            {},
+            `실습기관 삭제 (${ids.length}개 일괄 삭제)`
+          );
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");

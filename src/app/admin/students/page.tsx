@@ -180,6 +180,24 @@ export default function StudentsPage() {
 
       if (error) throw error;
 
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        await AdminLogger.logActivity(
+          currentUser.id,
+          currentUser.name || "알 수 없음",
+          currentUser.position_name || "알 수 없음",
+          "UPDATE",
+          "student_applications",
+          consultingStudent.id,
+          { consultation_content: consultingStudent.consultation_content },
+          { consultation_content: consultationContent },
+          `학생 상담내용 수정: ${consultingStudent.student_name}`,
+          undefined,
+          navigator.userAgent
+        );
+      }
+
       // 로컬 상태 업데이트
       setStudents((prev) =>
         prev.map((student) =>
@@ -551,6 +569,64 @@ export default function StudentsPage() {
     } catch (error) {
       console.error("Error marking as refunded:", error);
       alert("환불처리 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleMarkAsPending = async () => {
+    if (selectedStudents.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({
+          practice_completion_status: "not_started",
+        })
+        .in("id", selectedStudents);
+
+      if (error) throw error;
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          for (const studentId of selectedStudents) {
+            const student = students.find((s) => s.id === studentId);
+            await AdminLogger.logActivity(
+              currentUser.id,
+              currentUser.name || "알 수 없음",
+              currentUser.position_name || "알 수 없음",
+              "UPDATE",
+              "student_applications",
+              studentId,
+              student,
+              { practice_completion_status: "not_started" },
+              `학생 관리대기로 이동: ${student?.student_name || studentId}`,
+              undefined,
+              navigator.userAgent
+            );
+          }
+        } catch (logError) {
+          console.error("관리대기 이동 - 로그 기록 실패:", logError);
+        }
+      }
+
+      // 로컬 상태 업데이트
+      setStudents((prev) =>
+        prev.map((student) =>
+          selectedStudents.includes(student.id)
+            ? {
+                ...student,
+                practice_completion_status: "not_started",
+              }
+            : student
+        )
+      );
+
+      setSelectedStudents([]);
+      alert("선택된 학생들이 관리대기로 이동되었습니다.");
+    } catch (err) {
+      console.error("관리대기 이동 실패:", err);
+      alert("관리대기 이동 중 오류가 발생했습니다.");
     }
   };
 
@@ -1087,39 +1163,23 @@ export default function StudentsPage() {
                   >
                     실습완료 ({selectedStudents.length})
                   </button>
+                  <button
+                    onClick={handleMarkAsRefunded}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    환불완료 ({selectedStudents.length})
+                  </button>
                 </>
               )}
               {activeTab === "completed" && (
                 <>
                   <button
-                    onClick={() => {
-                      // 실습완료에서 관리대기로 일괄 이동
-                      const updatePromises = selectedStudents.map((studentId) =>
-                        supabase
-                          .from("student_applications")
-                          .update({
-                            practice_completion_status: "not_started",
-                          })
-                          .eq("id", studentId)
-                      );
-
-                      Promise.all(updatePromises).then(() => {
-                        setStudents((prev) =>
-                          prev.map((student) =>
-                            selectedStudents.includes(student.id)
-                              ? {
-                                  ...student,
-                                  practice_completion_status: "not_started",
-                                }
-                              : student
-                          )
-                        );
-                        setSelectedStudents([]);
-                        alert(
-                          `${selectedStudents.length}명의 학생을 관리대기로 이동했습니다.`
-                        );
-                      });
-                    }}
+                    onClick={handleMarkAsPending}
                     className={`px-4 py-2 rounded-lg transition-colors text-sm ${
                       selectedStudents.length > 0
                         ? "bg-blue-600 text-white hover:bg-blue-700"

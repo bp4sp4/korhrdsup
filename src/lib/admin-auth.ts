@@ -117,7 +117,14 @@ export class AdminAuth {
       // admin_users 테이블에서 사용자 정보 조회
       const { data: adminUser, error } = await supabase
         .from("admin_users")
-        .select("*")
+        .select(
+          `
+          *,
+          admin_roles!admin_users_role_id_fkey (
+            role_name
+          )
+        `
+        )
         .eq("id", user.id)
         .single();
 
@@ -134,7 +141,8 @@ export class AdminAuth {
       const result = {
         id: adminUser.id,
         name: adminUser.name || emailName,
-        position_name: "관리자",
+        position_name: adminUser.admin_roles?.role_name || "관리자",
+        is_super_admin: adminUser.admin_roles?.role_name === "최고관리자",
       };
 
       console.log("getCurrentUser - returning:", result);
