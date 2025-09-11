@@ -15,26 +15,26 @@ export default function Header({
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex  items-center h-16">
-          <Link href="/" className="flex items-center pr-6">
+        <div className="flex items-center h-16">
+          <Link href="/" className="flex items-center">
             <img
               src="/logo.png"
               alt="한평생실습지원센터 로고"
-              className="w-[100%] h-[1.5rem]"
+              className="h-8 sm:h-10 w-auto object-contain"
             />
           </Link>
 
           {/* 네비게이션 메뉴 */}
-          <nav className="hidden md:flex items-center pr-4">
+          <nav className="flex items-center ml-4 md:ml-8">
             <Link
               href="/about"
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200 text-sm md:text-base"
             >
               자세히 알아보기
             </Link>
           </nav>
 
-          <div className="flex items-center">
+          <div className="flex items-center ml-auto">
             {rightContent ||
               (showHomeLink && (
                 <Link
