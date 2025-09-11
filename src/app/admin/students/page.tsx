@@ -630,6 +630,129 @@ export default function StudentsPage() {
     }
   };
 
+  // 환불완료에서 관리대기로 이동
+  const handleMoveToPending = async () => {
+    if (selectedStudents.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({
+          payment_status: "pending",
+          service_payment_status: null,
+        })
+        .in("id", selectedStudents);
+
+      if (error) throw error;
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        for (const studentId of selectedStudents) {
+          const student = students.find((s) => s.id === studentId);
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "student_applications",
+            studentId,
+            student,
+            {
+              payment_status: "pending",
+              service_payment_status: null,
+            },
+            `학생 관리대기로 이동: ${student?.student_name || studentId}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
+      }
+
+      // 로컬 상태 업데이트
+      setStudents((prev) =>
+        prev.map((student) =>
+          selectedStudents.includes(student.id)
+            ? {
+                ...student,
+                payment_status: "pending",
+                service_payment_status: null,
+              }
+            : student
+        )
+      );
+
+      setSelectedStudents([]);
+      alert(`${selectedStudents.length}명의 학생을 관리대기로 이동했습니다.`);
+    } catch (error) {
+      console.error("Error moving to pending:", error);
+      alert("관리대기로 이동 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 환불완료에서 실습완료로 이동
+  const handleMoveToCompleted = async () => {
+    if (selectedStudents.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({
+          payment_status: "paid",
+          service_payment_status: "입금완료",
+          practice_completion_status: "completed",
+        })
+        .in("id", selectedStudents);
+
+      if (error) throw error;
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        for (const studentId of selectedStudents) {
+          const student = students.find((s) => s.id === studentId);
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "student_applications",
+            studentId,
+            student,
+            {
+              payment_status: "paid",
+              service_payment_status: "입금완료",
+              practice_completion_status: "completed",
+            },
+            `학생 실습완료로 이동: ${student?.student_name || studentId}`,
+            undefined,
+            navigator.userAgent
+          );
+        }
+      }
+
+      // 로컬 상태 업데이트
+      setStudents((prev) =>
+        prev.map((student) =>
+          selectedStudents.includes(student.id)
+            ? {
+                ...student,
+                payment_status: "paid",
+                service_payment_status: "입금완료",
+                practice_completion_status: "completed",
+              }
+            : student
+        )
+      );
+
+      setSelectedStudents([]);
+      alert(`${selectedStudents.length}명의 학생을 실습완료로 이동했습니다.`);
+    } catch (error) {
+      console.error("Error moving to completed:", error);
+      alert("실습완료로 이동 중 오류가 발생했습니다.");
+    }
+  };
+
   // 상태 변경 (완료 ↔ 환불)
   const handleStatusChange = async (
     studentId: string,
@@ -1228,6 +1351,32 @@ export default function StudentsPage() {
                     disabled={selectedStudents.length === 0}
                   >
                     환불완료로 ({selectedStudents.length})
+                  </button>
+                </>
+              )}
+              {activeTab === "refunded" && (
+                <>
+                  <button
+                    onClick={handleMoveToPending}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    관리대기로 ({selectedStudents.length})
+                  </button>
+                  <button
+                    onClick={handleMoveToCompleted}
+                    className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                      selectedStudents.length > 0
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    disabled={selectedStudents.length === 0}
+                  >
+                    실습완료로 ({selectedStudents.length})
                   </button>
                 </>
               )}
