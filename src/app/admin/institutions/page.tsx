@@ -39,6 +39,250 @@ const displayCurrencyWithWon = (value: string): string => {
   return `${parseInt(numericValue).toLocaleString()}원`;
 };
 
+// 지역 데이터
+const REGIONS = {
+  서울특별시: [
+    "종로구",
+    "중구",
+    "용산구",
+    "성동구",
+    "광진구",
+    "동대문구",
+    "중랑구",
+    "성북구",
+    "강북구",
+    "도봉구",
+    "노원구",
+    "은평구",
+    "서대문구",
+    "마포구",
+    "양천구",
+    "강서구",
+    "구로구",
+    "금천구",
+    "영등포구",
+    "동작구",
+    "관악구",
+    "서초구",
+    "강남구",
+    "송파구",
+    "강동구",
+  ],
+  부산광역시: [
+    "중구",
+    "서구",
+    "동구",
+    "영도구",
+    "부산진구",
+    "동래구",
+    "남구",
+    "북구",
+    "해운대구",
+    "사하구",
+    "금정구",
+    "강서구",
+    "연제구",
+    "수영구",
+    "사상구",
+    "기장군",
+  ],
+  대구광역시: [
+    "중구",
+    "동구",
+    "서구",
+    "남구",
+    "북구",
+    "수성구",
+    "달서구",
+    "달성군",
+  ],
+  인천광역시: [
+    "중구",
+    "동구",
+    "미추홀구",
+    "연수구",
+    "남동구",
+    "부평구",
+    "계양구",
+    "서구",
+    "강화군",
+    "옹진군",
+  ],
+  광주광역시: ["동구", "서구", "남구", "북구", "광산구"],
+  대전광역시: ["동구", "중구", "서구", "유성구", "대덕구"],
+  울산광역시: ["중구", "남구", "동구", "북구", "울주군"],
+  세종특별자치시: [],
+  경기도: [
+    "수원시",
+    "고양시",
+    "용인시",
+    "성남시",
+    "부천시",
+    "화성시",
+    "안산시",
+    "남양주시",
+    "안양시",
+    "평택시",
+    "시흥시",
+    "파주시",
+    "의정부시",
+    "김포시",
+    "광주시",
+    "광명시",
+    "군포시",
+    "하남시",
+    "오산시",
+    "양주시",
+    "이천시",
+    "구리시",
+    "안성시",
+    "포천시",
+    "의왕시",
+    "양평군",
+    "여주시",
+    "동두천시",
+    "가평군",
+    "과천시",
+    "연천군",
+  ],
+  강원도: [
+    "춘천시",
+    "원주시",
+    "강릉시",
+    "동해시",
+    "태백시",
+    "속초시",
+    "삼척시",
+    "홍천군",
+    "횡성군",
+    "영월군",
+    "평창군",
+    "정선군",
+    "철원군",
+    "화천군",
+    "양구군",
+    "인제군",
+    "고성군",
+    "양양군",
+  ],
+  충청북도: [
+    "청주시",
+    "충주시",
+    "제천시",
+    "보은군",
+    "옥천군",
+    "영동군",
+    "증평군",
+    "진천군",
+    "괴산군",
+    "음성군",
+    "단양군",
+  ],
+  충청남도: [
+    "천안시",
+    "공주시",
+    "보령시",
+    "아산시",
+    "서산시",
+    "논산시",
+    "계룡시",
+    "당진시",
+    "금산군",
+    "부여군",
+    "서천군",
+    "청양군",
+    "홍성군",
+    "예산군",
+    "태안군",
+  ],
+  전라북도: [
+    "전주시",
+    "군산시",
+    "익산시",
+    "정읍시",
+    "남원시",
+    "김제시",
+    "완주군",
+    "진안군",
+    "무주군",
+    "장수군",
+    "임실군",
+    "순창군",
+    "고창군",
+    "부안군",
+  ],
+  전라남도: [
+    "목포시",
+    "여수시",
+    "순천시",
+    "나주시",
+    "광양시",
+    "담양군",
+    "곡성군",
+    "구례군",
+    "고흥군",
+    "보성군",
+    "화순군",
+    "장흥군",
+    "강진군",
+    "해남군",
+    "영암군",
+    "무안군",
+    "함평군",
+    "영광군",
+    "장성군",
+    "완도군",
+    "진도군",
+    "신안군",
+  ],
+  경상북도: [
+    "포항시",
+    "경주시",
+    "김천시",
+    "안동시",
+    "구미시",
+    "영주시",
+    "영천시",
+    "상주시",
+    "문경시",
+    "경산시",
+    "군위군",
+    "의성군",
+    "청송군",
+    "영양군",
+    "영덕군",
+    "청도군",
+    "고령군",
+    "성주군",
+    "칠곡군",
+    "예천군",
+    "봉화군",
+    "울진군",
+    "울릉군",
+  ],
+  경상남도: [
+    "창원시",
+    "진주시",
+    "통영시",
+    "사천시",
+    "김해시",
+    "밀양시",
+    "거제시",
+    "양산시",
+    "의령군",
+    "함안군",
+    "창녕군",
+    "고성군",
+    "남해군",
+    "하동군",
+    "산청군",
+    "함양군",
+    "거창군",
+    "합천군",
+  ],
+  제주특별자치도: ["제주시", "서귀포시"],
+};
+
 // 실습교육원 인터페이스
 interface EducationCenter {
   id: string;
@@ -87,6 +331,42 @@ export default function InstitutionsPage() {
   );
   const [selectedEducation, setSelectedEducation] = useState<string[]>([]);
 
+  // 지역 선택 상태
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedDistrict, setSelectedDistrict] = useState<string>("");
+
+  // 실습가능 지역 선택 상태
+  const [selectedAvailableRegion, setSelectedAvailableRegion] =
+    useState<string>("");
+  const [selectedAvailableDistrict, setSelectedAvailableDistrict] =
+    useState<string>("");
+  const [availableAreas, setAvailableAreas] = useState<string[]>([]);
+
+  // 실습가능 지역 관리 함수들
+  const addAvailableArea = () => {
+    if (selectedAvailableRegion && selectedAvailableDistrict) {
+      const newArea = `${selectedAvailableRegion} ${selectedAvailableDistrict}`;
+      if (!availableAreas.includes(newArea)) {
+        setAvailableAreas([...availableAreas, newArea]);
+        setEducationForm({
+          ...educationForm,
+          practice_available_area: [...availableAreas, newArea].join(", "),
+        });
+        setSelectedAvailableRegion("");
+        setSelectedAvailableDistrict("");
+      }
+    }
+  };
+
+  const removeAvailableArea = (areaToRemove: string) => {
+    const updatedAreas = availableAreas.filter((area) => area !== areaToRemove);
+    setAvailableAreas(updatedAreas);
+    setEducationForm({
+      ...educationForm,
+      practice_available_area: updatedAreas.join(", "),
+    });
+  };
+
   // 실습기관 관련 상태
   const [practiceInstitutions, setPracticeInstitutions] = useState<
     PracticeInstitution[]
@@ -114,6 +394,17 @@ export default function InstitutionsPage() {
     website_url: "",
   });
 
+  // 지역 필터 상태
+  const [educationLocationFilter, setEducationLocationFilter] = useState({
+    region: "",
+    district: "",
+  });
+  const [educationAvailableAreaFilter, setEducationAvailableAreaFilter] =
+    useState({
+      region: "",
+      district: "",
+    });
+
   const [institutionFilters, setInstitutionFilters] = useState({
     institution_name: "",
     representative: "",
@@ -123,6 +414,12 @@ export default function InstitutionsPage() {
     application_valid_period: "",
     cost: "",
     special_notes: "",
+  });
+
+  // 실습기관 지역 필터 상태
+  const [institutionLocationFilter, setInstitutionLocationFilter] = useState({
+    region: "",
+    district: "",
   });
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -185,6 +482,34 @@ export default function InstitutionsPage() {
   const handleEducationEdit = (center: EducationCenter) => {
     setEditingEducation(center);
     setEducationForm(center);
+
+    // 기존 지역 정보 파싱
+    if (center.location) {
+      const locationParts = center.location.split(" ");
+      if (locationParts.length >= 2) {
+        setSelectedRegion(locationParts[0]);
+        setSelectedDistrict(locationParts[1]);
+      } else {
+        setSelectedRegion(center.location);
+        setSelectedDistrict("");
+      }
+    } else {
+      setSelectedRegion("");
+      setSelectedDistrict("");
+    }
+
+    // 기존 실습가능 지역 정보 파싱
+    if (center.practice_available_area) {
+      const areas = center.practice_available_area
+        .split(", ")
+        .filter((area) => area.trim());
+      setAvailableAreas(areas);
+    } else {
+      setAvailableAreas([]);
+    }
+    setSelectedAvailableRegion("");
+    setSelectedAvailableDistrict("");
+
     setShowEducationModal(true);
   };
 
@@ -303,6 +628,11 @@ export default function InstitutionsPage() {
   const handleEducationCancel = () => {
     setEditingEducation(null);
     setEducationForm({});
+    setSelectedRegion("");
+    setSelectedDistrict("");
+    setSelectedAvailableRegion("");
+    setSelectedAvailableDistrict("");
+    setAvailableAreas([]);
     setShowEducationModal(false);
   };
 
@@ -416,6 +746,22 @@ export default function InstitutionsPage() {
   const handleInstitutionEdit = (institution: PracticeInstitution) => {
     setEditingInstitution(institution);
     setInstitutionForm(institution);
+
+    // 기존 지역 정보 파싱
+    if (institution.practice_area) {
+      const locationParts = institution.practice_area.split(" ");
+      if (locationParts.length >= 2) {
+        setSelectedRegion(locationParts[0]);
+        setSelectedDistrict(locationParts[1]);
+      } else {
+        setSelectedRegion(institution.practice_area);
+        setSelectedDistrict("");
+      }
+    } else {
+      setSelectedRegion("");
+      setSelectedDistrict("");
+    }
+
     setShowInstitutionModal(true);
   };
 
@@ -533,6 +879,8 @@ export default function InstitutionsPage() {
   const handleInstitutionCancel = () => {
     setEditingInstitution(null);
     setInstitutionForm({});
+    setSelectedRegion("");
+    setSelectedDistrict("");
     setShowInstitutionModal(false);
   };
 
@@ -667,7 +1015,29 @@ export default function InstitutionsPage() {
       }
     );
 
-    return matchesSearch && matchesFilters;
+    // 지역 필터 적용
+    const matchesLocationFilter =
+      (!educationLocationFilter.region ||
+        center.location.includes(educationLocationFilter.region)) &&
+      (!educationLocationFilter.district ||
+        center.location.includes(educationLocationFilter.district));
+
+    const matchesAvailableAreaFilter =
+      (!educationAvailableAreaFilter.region ||
+        center.practice_available_area.includes(
+          educationAvailableAreaFilter.region
+        )) &&
+      (!educationAvailableAreaFilter.district ||
+        center.practice_available_area.includes(
+          educationAvailableAreaFilter.district
+        ));
+
+    return (
+      matchesSearch &&
+      matchesFilters &&
+      matchesLocationFilter &&
+      matchesAvailableAreaFilter
+    );
   });
 
   const filteredPracticeInstitutions = practiceInstitutions.filter(
@@ -717,7 +1087,20 @@ export default function InstitutionsPage() {
         }
       );
 
-      return matchesSearch && matchesFilters;
+      // 실습기관 지역 필터 적용
+      const matchesInstitutionLocationFilter =
+        (!institutionLocationFilter.region ||
+          institution.practice_area.includes(
+            institutionLocationFilter.region
+          )) &&
+        (!institutionLocationFilter.district ||
+          institution.practice_area.includes(
+            institutionLocationFilter.district
+          ));
+
+      return (
+        matchesSearch && matchesFilters && matchesInstitutionLocationFilter
+      );
     }
   );
 
@@ -734,6 +1117,8 @@ export default function InstitutionsPage() {
       practice_available_area: "",
       website_url: "",
     });
+    setEducationLocationFilter({ region: "", district: "" });
+    setEducationAvailableAreaFilter({ region: "", district: "" });
   };
 
   const resetInstitutionFilters = () => {
@@ -747,6 +1132,7 @@ export default function InstitutionsPage() {
       cost: "",
       special_notes: "",
     });
+    setInstitutionLocationFilter({ region: "", district: "" });
   };
 
   // 페이지네이션 로직
@@ -1057,6 +1443,7 @@ export default function InstitutionsPage() {
                           <option value="">전체</option>
                           <option value="주말">주말</option>
                           <option value="평일">평일</option>
+                          <option value="주말+평일">주말+평일</option>
                         </select>
                       </div>
 
@@ -1076,6 +1463,109 @@ export default function InstitutionsPage() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                           placeholder="예: https://"
                         />
+                      </div>
+
+                      {/* 지역 필터 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          위치 지역 시/도
+                        </label>
+                        <select
+                          value={educationLocationFilter.region}
+                          onChange={(e) => {
+                            setEducationLocationFilter({
+                              ...educationLocationFilter,
+                              region: e.target.value,
+                              district: "", // 시/도 변경 시 구/군 초기화
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="">전체</option>
+                          {Object.keys(REGIONS).map((region) => (
+                            <option key={region} value={region}>
+                              {region}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          위치 지역 구/군
+                        </label>
+                        <select
+                          value={educationLocationFilter.district}
+                          onChange={(e) => {
+                            setEducationLocationFilter({
+                              ...educationLocationFilter,
+                              district: e.target.value,
+                            });
+                          }}
+                          disabled={!educationLocationFilter.region}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">전체</option>
+                          {educationLocationFilter.region &&
+                            REGIONS[
+                              educationLocationFilter.region as keyof typeof REGIONS
+                            ]?.map((district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          실습가능 지역 시/도
+                        </label>
+                        <select
+                          value={educationAvailableAreaFilter.region}
+                          onChange={(e) => {
+                            setEducationAvailableAreaFilter({
+                              ...educationAvailableAreaFilter,
+                              region: e.target.value,
+                              district: "", // 시/도 변경 시 구/군 초기화
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="">전체</option>
+                          {Object.keys(REGIONS).map((region) => (
+                            <option key={region} value={region}>
+                              {region}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          실습가능 지역 구/군
+                        </label>
+                        <select
+                          value={educationAvailableAreaFilter.district}
+                          onChange={(e) => {
+                            setEducationAvailableAreaFilter({
+                              ...educationAvailableAreaFilter,
+                              district: e.target.value,
+                            });
+                          }}
+                          disabled={!educationAvailableAreaFilter.region}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">전체</option>
+                          {educationAvailableAreaFilter.region &&
+                            REGIONS[
+                              educationAvailableAreaFilter.region as keyof typeof REGIONS
+                            ]?.map((district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            ))}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -1524,6 +2014,58 @@ export default function InstitutionsPage() {
                           placeholder="예: 주말 실습 가능"
                         />
                       </div>
+
+                      {/* 실습기관 지역 필터 */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          기관 위치 시/도
+                        </label>
+                        <select
+                          value={institutionLocationFilter.region}
+                          onChange={(e) => {
+                            setInstitutionLocationFilter({
+                              ...institutionLocationFilter,
+                              region: e.target.value,
+                              district: "", // 시/도 변경 시 구/군 초기화
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                        >
+                          <option value="">전체</option>
+                          {Object.keys(REGIONS).map((region) => (
+                            <option key={region} value={region}>
+                              {region}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          기관 위치 구/군
+                        </label>
+                        <select
+                          value={institutionLocationFilter.district}
+                          onChange={(e) => {
+                            setInstitutionLocationFilter({
+                              ...institutionLocationFilter,
+                              district: e.target.value,
+                            });
+                          }}
+                          disabled={!institutionLocationFilter.region}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">전체</option>
+                          {institutionLocationFilter.region &&
+                            REGIONS[
+                              institutionLocationFilter.region as keyof typeof REGIONS
+                            ]?.map((district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1804,6 +2346,60 @@ export default function InstitutionsPage() {
                       </select>
                     </div>
 
+                    {/* 지역 선택 필드 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        시/도
+                      </label>
+                      <select
+                        value={selectedRegion}
+                        onChange={(e) => {
+                          setSelectedRegion(e.target.value);
+                          setSelectedDistrict(""); // 시/도 변경 시 구/군 초기화
+                          setEducationForm({
+                            ...educationForm,
+                            location: e.target.value,
+                          });
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">시/도를 선택하세요</option>
+                        {Object.keys(REGIONS).map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        구/군
+                      </label>
+                      <select
+                        value={selectedDistrict}
+                        onChange={(e) => {
+                          setSelectedDistrict(e.target.value);
+                          setEducationForm({
+                            ...educationForm,
+                            location: `${selectedRegion} ${e.target.value}`,
+                          });
+                        }}
+                        disabled={!selectedRegion}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      >
+                        <option value="">구/군을 선택하세요</option>
+                        {selectedRegion &&
+                          REGIONS[selectedRegion as keyof typeof REGIONS]?.map(
+                            (district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            )
+                          )}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         학기
@@ -1867,6 +2463,7 @@ export default function InstitutionsPage() {
                         <option value="">선택하세요</option>
                         <option value="주말">주말</option>
                         <option value="평일">평일</option>
+                        <option value="주말+평일">주말+평일</option>
                       </select>
                     </div>
 
@@ -1910,22 +2507,87 @@ export default function InstitutionsPage() {
                       />
                     </div>
 
+                    {/* 실습가능 지역 다중 선택 필드 */}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         실습가능 지역 <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
-                        value={educationForm.practice_available_area || ""}
-                        onChange={(e) =>
-                          setEducationForm({
-                            ...educationForm,
-                            practice_available_area: e.target.value,
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="예: 서울시 강서구"
-                      />
+
+                      {/* 지역 선택 */}
+                      <div className="flex gap-2 mb-2">
+                        <select
+                          value={selectedAvailableRegion}
+                          onChange={(e) => {
+                            setSelectedAvailableRegion(e.target.value);
+                            setSelectedAvailableDistrict(""); // 시/도 변경 시 구/군 초기화
+                          }}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">시/도를 선택하세요</option>
+                          {Object.keys(REGIONS).map((region) => (
+                            <option key={region} value={region}>
+                              {region}
+                            </option>
+                          ))}
+                        </select>
+
+                        <select
+                          value={selectedAvailableDistrict}
+                          onChange={(e) => {
+                            setSelectedAvailableDistrict(e.target.value);
+                          }}
+                          disabled={!selectedAvailableRegion}
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">구/군을 선택하세요</option>
+                          {selectedAvailableRegion &&
+                            REGIONS[
+                              selectedAvailableRegion as keyof typeof REGIONS
+                            ]?.map((district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            ))}
+                        </select>
+
+                        <button
+                          type="button"
+                          onClick={addAvailableArea}
+                          disabled={
+                            !selectedAvailableRegion ||
+                            !selectedAvailableDistrict
+                          }
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
+                        >
+                          추가
+                        </button>
+                      </div>
+
+                      {/* 선택된 지역 목록 */}
+                      {availableAreas.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-sm text-gray-600 mb-1">
+                            선택된 지역:
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {availableAreas.map((area, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                              >
+                                {area}
+                                <button
+                                  type="button"
+                                  onClick={() => removeAvailableArea(area)}
+                                  className="ml-2 text-blue-600 hover:text-blue-800"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="md:col-span-2">
@@ -2056,6 +2718,60 @@ export default function InstitutionsPage() {
                         <option value="의료기관">의료기관</option>
                         <option value="교육기관">교육기관</option>
                         <option value="기타">기타</option>
+                      </select>
+                    </div>
+
+                    {/* 지역 선택 필드 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        시/도 <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectedRegion}
+                        onChange={(e) => {
+                          setSelectedRegion(e.target.value);
+                          setSelectedDistrict(""); // 시/도 변경 시 구/군 초기화
+                          setInstitutionForm({
+                            ...institutionForm,
+                            practice_area: e.target.value,
+                          });
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">시/도를 선택하세요</option>
+                        {Object.keys(REGIONS).map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        구/군 <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectedDistrict}
+                        onChange={(e) => {
+                          setSelectedDistrict(e.target.value);
+                          setInstitutionForm({
+                            ...institutionForm,
+                            practice_area: `${selectedRegion} ${e.target.value}`,
+                          });
+                        }}
+                        disabled={!selectedRegion}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      >
+                        <option value="">구/군을 선택하세요</option>
+                        {selectedRegion &&
+                          REGIONS[selectedRegion as keyof typeof REGIONS]?.map(
+                            (district) => (
+                              <option key={district} value={district}>
+                                {district}
+                              </option>
+                            )
+                          )}
                       </select>
                     </div>
 
