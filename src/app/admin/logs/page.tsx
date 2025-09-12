@@ -327,6 +327,37 @@ function LogManagementPage() {
                       테이블: {log.table_name}
                       {log.record_id && ` | ID: ${log.record_id}`}
                     </div>
+                    {/* 변경사항 표시 */}
+                    {log.action_type === "UPDATE" &&
+                      log.old_values &&
+                      log.new_values && (
+                        <div className="mt-2 p-2 bg-blue-50 rounded border-l-4 border-blue-400">
+                          <div className="text-xs font-medium text-blue-800 mb-1">
+                            변경된 항목:
+                          </div>
+                          <div className="space-y-1">
+                            {AdminLogger.getChangedFields(
+                              log.old_values,
+                              log.new_values
+                            ).map((change, index) => (
+                              <div
+                                key={index}
+                                className="text-xs text-blue-700"
+                              >
+                                <span className="font-medium">
+                                  {AdminLogger.getFieldDisplayName(
+                                    change.field
+                                  )}
+                                  :
+                                </span>
+                                <span className="ml-1">
+                                  "{change.oldValue}" → "{change.newValue}"
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                   </div>
                 </div>
               ))}

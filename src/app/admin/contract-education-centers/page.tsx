@@ -14,6 +14,7 @@ interface ContractEducationCenter {
   payment_date: string;
   payment_method: string;
   manager: string;
+  start_date: string;
   special_notes: string | null;
   created_at: string;
   updated_at: string;
@@ -48,6 +49,7 @@ export default function ContractEducationCentersPage() {
     payment_date: "",
     payment_method: "",
     manager: "",
+    start_date: "",
     special_notes: "",
   });
   const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
@@ -99,6 +101,7 @@ export default function ContractEducationCentersPage() {
       payment_date: "",
       payment_method: "",
       manager: "",
+      start_date: "",
       special_notes: "",
     });
     setShowEditModal(true);
@@ -109,10 +112,12 @@ export default function ContractEducationCentersPage() {
       let recordId: string;
       let actionType: string;
       let oldValues: any = null;
+      let newValues: any = null;
 
       if (editingCenter) {
         // 수정
         oldValues = editingCenter;
+        newValues = editForm;
         const { error } = await supabase
           .from("contract_education_centers")
           .update(editForm)
@@ -123,6 +128,7 @@ export default function ContractEducationCentersPage() {
         actionType = "UPDATE";
       } else {
         // 추가
+        newValues = editForm;
         const { data, error } = await supabase
           .from("contract_education_centers")
           .insert([editForm]);
@@ -144,6 +150,7 @@ export default function ContractEducationCentersPage() {
             "contract_education_centers",
             recordId,
             oldValues,
+            newValues,
             editForm,
             `협약교육원 ${actionType === "CREATE" ? "등록" : "수정"}: ${
               editForm.student_name
@@ -270,6 +277,7 @@ export default function ContractEducationCentersPage() {
       payment_date: "",
       payment_method: "",
       manager: "",
+      start_date: "",
       special_notes: "",
     });
     setSelectedMonths([]);
@@ -288,6 +296,13 @@ export default function ContractEducationCentersPage() {
     newPaymentMethod: string
   ) => {
     try {
+      // 기존 데이터 가져오기
+      const center = centers.find((c) => c.id === centerId);
+      const oldValues = center
+        ? { payment_method: center.payment_method }
+        : null;
+      const newValues = { payment_method: newPaymentMethod };
+
       const { error } = await supabase
         .from("contract_education_centers")
         .update({ payment_method: newPaymentMethod })
@@ -303,6 +318,26 @@ export default function ContractEducationCentersPage() {
             : center
         )
       );
+
+      // 로그 기록
+      const currentUser = await AdminAuth.getCurrentUser();
+      if (currentUser) {
+        try {
+          await AdminLogger.logActivity(
+            currentUser.id,
+            currentUser.name || "알 수 없음",
+            currentUser.position_name || "알 수 없음",
+            "UPDATE",
+            "contract_education_centers",
+            centerId,
+            oldValues,
+            newValues,
+            `결제 방법 변경: ${center?.student_name || centerId}`
+          );
+        } catch (logError) {
+          console.error("로그 기록 실패:", logError);
+        }
+      }
 
       alert(`결제 방법이 "${newPaymentMethod}"로 변경되었습니다.`);
     } catch (err) {
@@ -754,6 +789,20 @@ export default function ContractEducationCentersPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                      개강일
+                    </label>
+                    <input
+                      type="date"
+                      value={filters.start_date}
+                      onChange={(e) =>
+                        setFilters({ ...filters, start_date: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       특이사항
                     </label>
                     <input
@@ -861,6 +910,9 @@ export default function ContractEducationCentersPage() {
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
                       담당자
                     </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[100px]">
+                      개강일
+                    </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">
                       특이사항
                     </th>
@@ -914,6 +966,9 @@ export default function ContractEducationCentersPage() {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
                         {center.manager}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 min-w-[100px] text-center">
+                        {formatDateToKorean(center.start_date)}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 min-w-[150px] text-center">
                         {center.special_notes || "-"}
@@ -1125,6 +1180,22 @@ export default function ContractEducationCentersPage() {
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="예: 김담당"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    개강일 <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={editForm.start_date || ""}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, start_date: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    min="2024-11-01"
+                    max="2026-12-31"
                   />
                 </div>
 

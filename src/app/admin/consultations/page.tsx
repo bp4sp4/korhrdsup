@@ -184,25 +184,28 @@ function AdminDashboard() {
         (c) => c.id === editingMemo.id
       );
 
+      // 새로운 데이터 준비
+      const newData = {
+        memo_type: editingMemo.memo_type,
+        writer_name: editingMemo.writer_name,
+        related_person: editingMemo.related_person,
+        memo_content: editingMemo.memo_content,
+        attached_file_name: attachedFile
+          ? attachedFile.name
+          : editingMemo.attached_file_name,
+        attached_file_url: attachedFile
+          ? URL.createObjectURL(attachedFile)
+          : editingMemo.attached_file_url,
+        attached_file_size: attachedFile
+          ? attachedFile.size
+          : editingMemo.attached_file_size,
+        updated_at: new Date().toISOString(),
+      };
+
       // Supabase에서 상담 데이터 업데이트
       const { error } = await supabase
         .from("consultations")
-        .update({
-          memo_type: editingMemo.memo_type,
-          writer_name: editingMemo.writer_name,
-          related_person: editingMemo.related_person,
-          memo_content: editingMemo.memo_content,
-          attached_file_name: attachedFile
-            ? attachedFile.name
-            : editingMemo.attached_file_name,
-          attached_file_url: attachedFile
-            ? URL.createObjectURL(attachedFile)
-            : editingMemo.attached_file_url,
-          attached_file_size: attachedFile
-            ? attachedFile.size
-            : editingMemo.attached_file_size,
-          updated_at: new Date().toISOString(),
-        })
+        .update(newData)
         .eq("id", editingMemo.id);
 
       if (error) throw error;
@@ -218,7 +221,7 @@ function AdminDashboard() {
           "consultations",
           editingMemo.id.toString(),
           originalConsultation,
-          editingMemo,
+          newData,
           `메모 수정: ${editingMemo.related_person}`,
           undefined,
           navigator.userAgent

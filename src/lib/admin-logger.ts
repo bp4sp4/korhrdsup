@@ -212,6 +212,106 @@ export class AdminLogger {
   }
 
   /**
+   * 변경된 필드들을 비교하여 반환합니다
+   */
+  static getChangedFields(oldValues: any, newValues: any): Array<{
+    field: string;
+    oldValue: any;
+    newValue: any;
+  }> {
+    if (!oldValues || !newValues) return [];
+
+    const changes: Array<{ field: string; oldValue: any; newValue: any }> = [];
+    
+    // 모든 키를 확인 (oldValues와 newValues 모두)
+    const allKeys = new Set([
+      ...Object.keys(oldValues || {}),
+      ...Object.keys(newValues || {})
+    ]);
+
+    for (const key of allKeys) {
+      const oldVal = oldValues?.[key];
+      const newVal = newValues?.[key];
+      
+      // 값이 다르면 변경된 것으로 간주
+      if (oldVal !== newVal) {
+        changes.push({
+          field: key,
+          oldValue: oldVal,
+          newValue: newVal
+        });
+      }
+    }
+
+    return changes;
+  }
+
+  /**
+   * 필드명을 한국어로 변환합니다
+   */
+  static getFieldDisplayName(fieldName: string): string {
+    const fieldNames: { [key: string]: string } = {
+      name: "이름",
+      status: "상태",
+      email: "이메일",
+      phone: "전화번호",
+      address: "주소",
+      description: "설명",
+      created_at: "생성일",
+      updated_at: "수정일",
+      admin_user_id: "관리자 ID",
+      admin_username: "관리자명",
+      admin_role_name: "관리자 역할",
+      action_type: "액션 타입",
+      table_name: "테이블명",
+      record_id: "레코드 ID",
+      ip_address: "IP 주소",
+      user_agent: "사용자 에이전트",
+      // 계약교육원 관련 필드들
+      center_name: "교육원명",
+      center_type: "교육원 유형",
+      contact_person: "담당자",
+      contact_phone: "담당자 전화번호",
+      contact_email: "담당자 이메일",
+      business_number: "사업자번호",
+      address_detail: "상세주소",
+      postal_code: "우편번호",
+      region: "지역",
+      is_active: "활성 상태",
+      contract_start_date: "계약 시작일",
+      contract_end_date: "계약 종료일",
+      // 학생 관련 필드들
+      student_name: "학생명",
+      student_id: "학생 ID",
+      birth_date: "생년월일",
+      gender: "성별",
+      school_name: "학교명",
+      grade: "학년",
+      parent_name: "부모명",
+      parent_phone: "부모 전화번호",
+      parent_email: "부모 이메일",
+      // 기관 관련 필드들
+      institution_name: "기관명",
+      institution_type: "기관 유형",
+      director_name: "원장명",
+      director_phone: "원장 전화번호",
+      director_email: "원장 이메일",
+      // 상담 관련 필드들
+      consultation_type: "상담 유형",
+      consultation_date: "상담일",
+      consultation_time: "상담 시간",
+      consultation_status: "상담 상태",
+      consultation_content: "상담 내용",
+      consultation_result: "상담 결과",
+      counselor_name: "상담사명",
+      counselor_phone: "상담사 전화번호",
+      counselor_email: "상담사 이메일",
+    };
+
+    return fieldNames[fieldName] || fieldName;
+  }
+
+  /**
    * 특정 사용자의 활동 로그를 조회합니다
    */
   static async getUserActivityLogs(adminUserId: string, limit: number = 50) {
