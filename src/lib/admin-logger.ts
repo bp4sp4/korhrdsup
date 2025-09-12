@@ -214,7 +214,10 @@ export class AdminLogger {
   /**
    * 변경된 필드들을 비교하여 반환합니다
    */
-  static getChangedFields(oldValues: any, newValues: any): Array<{
+  static getChangedFields(
+    oldValues: any,
+    newValues: any
+  ): Array<{
     field: string;
     oldValue: any;
     newValue: any;
@@ -222,23 +225,51 @@ export class AdminLogger {
     if (!oldValues || !newValues) return [];
 
     const changes: Array<{ field: string; oldValue: any; newValue: any }> = [];
-    
+
+    // 시스템 필드들 (변경 추적에서 제외)
+    const systemFields = new Set([
+      "id",
+      "created_at",
+      "updated_at",
+      "admin_user_id",
+      "admin_username",
+      "admin_role_name",
+      "action_type",
+      "table_name",
+      "record_id",
+      "ip_address",
+      "user_agent",
+      "description",
+    ]);
+
     // 모든 키를 확인 (oldValues와 newValues 모두)
     const allKeys = new Set([
       ...Object.keys(oldValues || {}),
-      ...Object.keys(newValues || {})
+      ...Object.keys(newValues || {}),
     ]);
 
     for (const key of allKeys) {
+      // 시스템 필드는 제외
+      if (systemFields.has(key)) continue;
+
       const oldVal = oldValues?.[key];
       const newVal = newValues?.[key];
-      
+
+      // null, undefined, 빈 문자열을 동일하게 처리
+      const normalizeValue = (val: any) => {
+        if (val === null || val === undefined || val === "") return null;
+        return val;
+      };
+
+      const normalizedOldVal = normalizeValue(oldVal);
+      const normalizedNewVal = normalizeValue(newVal);
+
       // 값이 다르면 변경된 것으로 간주
-      if (oldVal !== newVal) {
+      if (normalizedOldVal !== normalizedNewVal) {
         changes.push({
           field: key,
           oldValue: oldVal,
-          newValue: newVal
+          newValue: newVal,
         });
       }
     }

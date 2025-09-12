@@ -116,7 +116,10 @@ export default function ContractEducationCentersPage() {
 
       if (editingCenter) {
         // 수정
-        oldValues = editingCenter;
+        // 시스템 필드 제외한 기존 데이터
+        const { id, created_at, updated_at, ...oldDataWithoutSystemFields } =
+          editingCenter;
+        oldValues = oldDataWithoutSystemFields;
         newValues = editForm;
         const { error } = await supabase
           .from("contract_education_centers")
@@ -151,7 +154,6 @@ export default function ContractEducationCentersPage() {
             recordId,
             oldValues,
             newValues,
-            editForm,
             `협약교육원 ${actionType === "CREATE" ? "등록" : "수정"}: ${
               editForm.student_name
             }`,

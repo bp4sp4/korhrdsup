@@ -245,6 +245,10 @@ export default function InstitutionsPage() {
 
         // 로그 기록 (수정)
         if (currentUser) {
+          // 시스템 필드 제외한 기존 데이터
+          const { id, created_at, updated_at, ...oldDataWithoutSystemFields } =
+            editingEducation;
+
           await AdminLogger.logActivity(
             currentUser.id,
             currentUser.name || "알 수 없음",
@@ -252,7 +256,7 @@ export default function InstitutionsPage() {
             "UPDATE",
             "education_centers",
             editingEducation.id,
-            editingEducation,
+            oldDataWithoutSystemFields,
             cleanFormData,
             `실습교육원 수정: ${cleanFormData.center_name}`,
             undefined,
@@ -474,6 +478,10 @@ export default function InstitutionsPage() {
 
         // 로그 기록 (수정)
         if (currentUser) {
+          // 시스템 필드 제외한 기존 데이터
+          const { id, created_at, updated_at, ...oldDataWithoutSystemFields } =
+            editingInstitution;
+
           await AdminLogger.logActivity(
             currentUser.id,
             currentUser.name || "알 수 없음",
@@ -481,7 +489,7 @@ export default function InstitutionsPage() {
             "UPDATE",
             "practice_institutions",
             editingInstitution.id,
-            editingInstitution,
+            oldDataWithoutSystemFields,
             cleanFormData,
             `실습기관 수정: ${cleanFormData.institution_name}`,
             undefined,
